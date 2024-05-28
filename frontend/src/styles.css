@@ -1,0 +1,46 @@
+:root {
+  font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+
+  color: #0f0f0f;
+  background-color: #f6f6f6;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  user-select: none;
+  cursor: default;
+  /* Standard syntax */
+  /* Safari */
+  /* Firefox */
+  -webkit-user-select: auto;
+  -moz-user-select: auto;
+  -ms-user-select: auto;
+  /* Internet Explorer/Edge */
+}
+
+html,
+body,
+#root {
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  overscroll-behavior-y: none;
+}
+
+.ant-input-affix-wrapper,
+.ant-btn,
+.ant-select-selector {
+  border-radius: 4px !important;
+}
+
+
+.ant-layout-sider-trigger {
+  border: 1px solid rgb(237, 237, 237) !important;
+}

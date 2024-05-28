@@ -1,0 +1,20 @@
+.search {
+  color: #ffe4e4;
+  padding: 20px 10px;
+  font-size: 20px;
+  /* background: #2e8de0; */
+
+  font-weight: bolder;
+  /* margin-bottom: 20px; */
+  /* max-height: 64px; */
+  width: '100%';
+  border-radius: 2px;
+}
+
+.ant-layout-sider-children {
+  width: 100%;
+  justify-content: flex-start;
+  /* padding: 10px; */
+  flex-direction: column;
+  display: flex;
+}
