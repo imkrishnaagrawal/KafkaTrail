@@ -66,7 +66,7 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
         })
       );
     } catch (error) {
-      console.error('Error invoking Rust function:', error);
+      console.error('Error invoking Fetch Data function:', error);
     }
   };
 
@@ -83,7 +83,7 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
         })
       );
     } catch (error) {
-      console.error('Error invoking Rust function:', error);
+      console.error('Error invoking Fetch Meta function:', error);
     }
   };
 

@@ -14,7 +14,7 @@ interface ConfigState {
   loading: boolean;
   error: string | null;
 }
-// write async thunk to validate kafka connection using ealier rust code
+
 
 const initialState: ConfigState = {
   fetchSettings: {

@@ -1,10 +1,10 @@
 package main
 
 import (
-	"context"
+	"crypto/tls"
 	"time"
 
-	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/IBM/sarama"
 )
 
 type PartitionMeta struct {
@@ -67,10 +67,12 @@ func NewKafkaService() *KafkaService {
 }
 
 func (k *KafkaService) ValidateConnection(config KafkaConfig) (string, error) {
-	_, err := createConsumer(config)
+	consumer, err := createConsumer(config)
 	if err != nil {
 		return "", err
 	}
+	defer consumer.Close()
+
 	return "Connection Validated", nil
 }
 
@@ -81,14 +83,9 @@ func (k *KafkaService) FetchTopics(config KafkaConfig) ([]string, error) {
 	}
 	defer consumer.Close()
 
-	metadata, err := consumer.GetMetadata(nil, true, 5000)
+	topics, err := consumer.Topics()
 	if err != nil {
 		return nil, err
-	}
-
-	topics := make([]string, 0)
-	for _, topic := range metadata.Topics {
-		topics = append(topics, topic.Topic)
 	}
 
 	return topics, nil
@@ -101,67 +98,62 @@ func (k *KafkaService) ProduceMessage(config KafkaConfig, message ProducerMessag
 	}
 	defer producer.Close()
 
-	headers := make([]kafka.Header, len(message.Headers))
+	headers := make([]sarama.RecordHeader, len(message.Headers))
 	for i, h := range message.Headers {
-		headers[i] = kafka.Header{Key: h.Key, Value: []byte(h.Value)}
+		headers[i] = sarama.RecordHeader{Key: []byte(h.Key), Value: []byte(h.Value)}
 	}
 
-	msg := &kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &message.Topic, Partition: kafka.PartitionAny},
-		Key:            []byte(message.Key),
-		Value:          []byte(message.Value),
-		Headers:        headers,
+	msg := &sarama.ProducerMessage{
+		Topic:   message.Topic,
+		Key:     sarama.StringEncoder(message.Key),
+		Value:   sarama.StringEncoder(message.Value),
+		Headers: headers,
 	}
 
-	err = producer.Produce(msg, nil)
+	_, _, err = producer.SendMessage(msg)
 	if err != nil {
 		return "", err
 	}
-
-	producer.Flush(5 * 1000)
 
 	return "Message produced", nil
 }
 
 func (k *KafkaService) FetchMeta(config KafkaConfig, topic string, partition int32, count int64, offsetLatest bool) (*TopicMeta, error) {
-	consumer, err := createConsumer(config)
+	client, err := createClient(config)
 	if err != nil {
 		return nil, err
 	}
-	defer consumer.Close()
+	defer client.Close()
 
-	meta, _ := consumer.GetMetadata(&topic, false, 5000)
+	partitions, err := client.Partitions(topic)
+	if err != nil {
+		return nil, err
+	}
 
-	partitions := len(meta.Topics[topic].Partitions)
+	totalMessage := int64(0)
+	partitionMessages := make([]PartitionMeta, len(partitions))
 
-	totalMessage := 0
-	partitionMessages := make([]PartitionMeta, 0)
-	for partition := 0; partition < partitions; partition++ {
-		low, high, err := consumer.QueryWatermarkOffsets(topic, int32(partition), 5000)
+	for i, partition := range partitions {
+		oldestOffset, err := client.GetOffset(topic, partition, sarama.OffsetOldest)
 		if err != nil {
 			return nil, err
 		}
 
-		totalMessagesInPartation := high - low
-		partitionMessages = append(partitionMessages, PartitionMeta{high, low, totalMessagesInPartation})
-		totalMessage += int(totalMessagesInPartation)
-		count = count / int64(partitions)
-		if count == 0 {
-			count = totalMessagesInPartation
+		newestOffset, err := client.GetOffset(topic, partition, sarama.OffsetNewest)
+		if err != nil {
+			return nil, err
 		}
 
-		if count > totalMessagesInPartation {
-			count = totalMessagesInPartation
-		}
-
+		totalMessagesInPartition := newestOffset - oldestOffset
+		partitionMessages[i] = PartitionMeta{newestOffset, oldestOffset, totalMessagesInPartition}
+		totalMessage += totalMessagesInPartition
 	}
 
 	return &TopicMeta{
-		MessageCount:   int64(totalMessage),
-		PartitionCount: partitions,
+		MessageCount:   totalMessage,
+		PartitionCount: len(partitions),
 		Partitions:     partitionMessages,
 	}, nil
-
 }
 
 func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, partition int32, count int64, offsetLatest bool) (*TopicData, error) {
@@ -170,54 +162,43 @@ func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, partition
 		return nil, err
 	}
 	defer consumer.Close()
-	topicMeta, _ := k.FetchMeta(config, topic, partition, count, offsetLatest)
 
-	var messages []KafkaMessage
+	topicMeta, err := k.FetchMeta(config, topic, partition, count, offsetLatest)
+	if err != nil {
+		return nil, err
+	}
 
-	for partition := 0; partition < len(topicMeta.Partitions); partition++ {
-
-		count = count / int64(len(topicMeta.Partitions))
-		if count == 0 {
-			count = topicMeta.Partitions[partition].Count
+	messages := make([]KafkaMessage, 0)
+	for pIndex, p := range topicMeta.Partitions {
+		pc, err := consumer.ConsumePartition(topic, int32(pIndex), p.Low)
+		if err != nil {
+			return nil, err
 		}
+		defer pc.Close()
 
-		offset := topicMeta.Partitions[partition].Low
-		if offsetLatest {
-			offset = topicMeta.Partitions[partition].High - count
-			if offset < topicMeta.Partitions[partition].Low {
-				offset = topicMeta.Partitions[partition].Low
-			}
-		}
+		for i := int64(0); i < p.Count; i++ {
+			select {
+			case msg := <-pc.Messages():
+				headers := make([]HeaderArg, len(msg.Headers))
+				for i, h := range msg.Headers {
+					headers[i] = HeaderArg{Key: string(h.Key), Value: string(h.Value)}
+				}
 
-		if count > topicMeta.Partitions[partition].Count {
-			count = topicMeta.Partitions[partition].Count
-		}
+				kafkaMessage := KafkaMessage{
+					Topic:     msg.Topic,
+					Offset:    msg.Offset,
+					Value:     string(msg.Value),
+					Key:       string(msg.Key),
+					Timestamp: msg.Timestamp.Unix(),
+					Partition: msg.Partition,
+					Headers:   headers,
+					Size:      int64(len(msg.Value)),
+				}
 
-		consumer.Assign([]kafka.TopicPartition{{Topic: &topic, Partition: int32(partition), Offset: kafka.Offset(offset)}})
-
-		for i := int64(0); i < count; i++ {
-			msg, err := consumer.ReadMessage(5 * time.Second)
-			if err != nil {
+				messages = append(messages, kafkaMessage)
+			case <-time.After(5 * time.Second):
 				break
 			}
-
-			headers := make([]HeaderArg, len(msg.Headers))
-			for i, h := range msg.Headers {
-				headers[i] = HeaderArg{Key: h.Key, Value: string(h.Value)}
-			}
-
-			kafkaMessage := KafkaMessage{
-				Topic:     *msg.TopicPartition.Topic,
-				Offset:    int64(msg.TopicPartition.Offset),
-				Value:     string(msg.Value),
-				Key:       string(msg.Key),
-				Timestamp: msg.Timestamp.Unix(),
-				Partition: msg.TopicPartition.Partition,
-				Headers:   headers,
-				Size:      int64(len(msg.Value)),
-			}
-
-			messages = append(messages, kafkaMessage)
 		}
 	}
 
@@ -225,87 +206,99 @@ func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, partition
 		Metadata: *topicMeta,
 		Messages: messages,
 	}, nil
-
 }
 
 func (k *KafkaService) GetTopicSettings(config KafkaConfig, topic string) (map[string]string, error) {
-	adminClient, err := kafka.NewAdminClient(&kafka.ConfigMap{
-		"bootstrap.servers": config.BootstrapServers,
-		"security.protocol": config.Protocol,
-		"sasl.mechanism":    config.SaslMechanism,
-		"sasl.username":     config.SaslUsername,
-		"sasl.password":     config.SaslPassword,
-	})
+	admin, err := createAdmin(config)
 	if err != nil {
 		return nil, err
 	}
-	defer adminClient.Close()
+	defer admin.Close()
 
-	resource := kafka.ConfigResource{
-		Type: kafka.ResourceTopic,
+	request := sarama.ConfigResource{
+
+		Type: sarama.TopicResource,
 		Name: topic,
 	}
+	// admin.DescribeConfig()
 
-	results, err := adminClient.DescribeConfigs(context.Background(), []kafka.ConfigResource{resource})
+	response, err := admin.DescribeConfig(request)
+
 	if err != nil {
 		return nil, err
 	}
 
 	settings := make(map[string]string)
-	for _, result := range results {
-		if result.Error.Code() != kafka.ErrNoError {
-			continue
-		}
-		for _, entry := range result.Config {
-			settings[entry.Name] = entry.Value
-		}
+	for _, entry := range response {
+		settings[entry.Name] = entry.Value
 	}
 
 	return settings, nil
 }
 
-func createProducer(config KafkaConfig) (*kafka.Producer, error) {
-	producerConfig := &kafka.ConfigMap{
-		"bootstrap.servers": config.BootstrapServers,
-		"security.protocol": config.Protocol,
-		"sasl.mechanism":    config.SaslMechanism,
-		"sasl.username":     config.SaslUsername,
-		"sasl.password":     config.SaslPassword,
+func getClientConfig(config KafkaConfig) *sarama.Config {
+	clientConfig := sarama.NewConfig()
+	// clientConfig.ClientID = "kafka-trial"
+	// clientConfig.Version = sarama.V
+	if config.Protocol == "SASL_SSL" {
+		clientConfig.Net.SASL.Enable = true
+		clientConfig.Net.SASL.Mechanism = sarama.SASLTypePlaintext
+		clientConfig.Net.SASL.User = config.SaslUsername
+		clientConfig.Net.SASL.Password = config.SaslPassword
+		clientConfig.Net.TLS.Enable = true
+		clientConfig.Net.TLS.Config = &tls.Config{
+			InsecureSkipVerify: true,
+			ClientAuth:         0,
+		}
+
 	}
 
-	if config.SaslMechanism == "" {
-		delete(*producerConfig, "sasl.mechanism")
-	}
-	if config.SaslUsername == "" {
-		delete(*producerConfig, "sasl.username")
-	}
-	if config.SaslPassword == "" {
-		delete(*producerConfig, "sasl.password")
+	return clientConfig
+
+}
+func createClient(config KafkaConfig) (sarama.Client, error) {
+	clientConfig := getClientConfig(config)
+	client, err := sarama.NewClient([]string{config.BootstrapServers}, clientConfig)
+	if err != nil {
+		return nil, err
 	}
 
-	return kafka.NewProducer(producerConfig)
+	return client, nil
+}
+func createAdmin(config KafkaConfig) (sarama.ClusterAdmin, error) {
+	adminConfig := getClientConfig(config)
+
+	admin, err := sarama.NewClusterAdmin([]string{config.BootstrapServers}, adminConfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return admin, nil
 }
 
-func createConsumer(config KafkaConfig) (*kafka.Consumer, error) {
-	consumerConfig := &kafka.ConfigMap{
-		"bootstrap.servers": config.BootstrapServers,
-		"group.id":          config.GroupID,
-		"auto.offset.reset": config.AutoOffsetReset,
-		"security.protocol": config.Protocol,
-		"sasl.mechanism":    config.SaslMechanism,
-		"sasl.username":     config.SaslUsername,
-		"sasl.password":     config.SaslPassword,
+func createProducer(config KafkaConfig) (sarama.SyncProducer, error) {
+	producerConfig := getClientConfig(config)
+	producerConfig.Producer.RequiredAcks = sarama.WaitForAll
+	producerConfig.Producer.Retry.Max = 5
+	producerConfig.Producer.Return.Successes = true
+
+	producer, err := sarama.NewSyncProducer([]string{config.BootstrapServers}, producerConfig)
+	if err != nil {
+		return nil, err
 	}
 
-	if config.SaslMechanism == "" {
-		delete(*consumerConfig, "sasl.mechanism")
-	}
-	if config.SaslUsername == "" {
-		delete(*consumerConfig, "sasl.username")
-	}
-	if config.SaslPassword == "" {
-		delete(*consumerConfig, "sasl.password")
+	return producer, nil
+}
+
+func createConsumer(config KafkaConfig) (sarama.Consumer, error) {
+	consumerConfig := getClientConfig(config)
+	consumerConfig.Consumer.Return.Errors = true
+	consumerConfig.Consumer.Offsets.Initial = sarama.OffsetOldest
+
+	consumer, err := sarama.NewConsumer([]string{config.BootstrapServers}, consumerConfig)
+	if err != nil {
+		return nil, err
 	}
 
-	return kafka.NewConsumer(consumerConfig)
+	return consumer, nil
 }
