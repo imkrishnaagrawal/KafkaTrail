@@ -1,0 +1,32 @@
+name: Wails build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [
+          {name: KafkaTrail.AppImage, platform: linux/amd64, os: ubuntu-20.04},
+          {name: KafkaTrail.exe, platform: windows/amd64, os: windows-latest},
+          {name: KafkaTrail, platform: darwin/universal, os: macos-latest}
+        ]
+    runs-on: ${{ matrix.build.os }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: lpdswing/wails-build-action@v2
+        with:
+          build-name: ${{ matrix.build.name }}
+          build-platform: ${{ matrix.build.platform }}
+          soft-version: ${{ github.ref }}
+          go-version: 1.22
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
