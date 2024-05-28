@@ -140,7 +140,7 @@ export const fetchTopicMeta = createAsyncThunk(
           setTimeout(resolve, 1000);
         }),
 
-        FetchMeta(config, currentTopic, 0, fetchSettings.messageCount, fetchSettings.autoOffsetReset == 'latest'),
+        FetchMeta(config, currentTopic, 0, fetchSettings.messageCount),
       ]);
       let topicMeta = {
         message_count: response.message_count,

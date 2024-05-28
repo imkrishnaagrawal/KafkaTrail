@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+	  {
+		"label": "build",
+		"type": "shell",
+		"options": {
+		  "cwd": "${workspaceFolder}",
+		  "env": {
+            "CGO_LDFLAGS": "-framework UniformTypeIdentifiers",
+          }
+		},
+		"command": "go",
+		"args": [
+		  "build",
+		  "-tags",
+		  "dev",
+		  "-gcflags",
+		  "all=-N -l",
+		  "-o",
+		  "build/bin/kafka-trail.app"
+		]
+	  }
+	]
+  }

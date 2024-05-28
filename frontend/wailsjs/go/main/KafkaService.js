@@ -6,8 +6,8 @@ export function FetchMessages(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['KafkaService']['FetchMessages'](arg1, arg2, arg3, arg4, arg5);
 }
 
-export function FetchMeta(arg1, arg2, arg3, arg4, arg5) {
-  return window['go']['main']['KafkaService']['FetchMeta'](arg1, arg2, arg3, arg4, arg5);
+export function FetchMeta(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['KafkaService']['FetchMeta'](arg1, arg2, arg3, arg4);
 }
 
 export function FetchTopics(arg1) {

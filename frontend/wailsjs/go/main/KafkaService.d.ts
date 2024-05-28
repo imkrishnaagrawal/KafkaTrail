@@ -4,7 +4,7 @@ import {main} from '../models';
 
 export function FetchMessages(arg1:main.KafkaConfig,arg2:string,arg3:number,arg4:number,arg5:boolean):Promise<main.TopicData>;
 
-export function FetchMeta(arg1:main.KafkaConfig,arg2:string,arg3:number,arg4:number,arg5:boolean):Promise<main.TopicMeta>;
+export function FetchMeta(arg1:main.KafkaConfig,arg2:string,arg3:number,arg4:number):Promise<main.TopicMeta>;
 
 export function FetchTopics(arg1:main.KafkaConfig):Promise<Array<string>>;
 
