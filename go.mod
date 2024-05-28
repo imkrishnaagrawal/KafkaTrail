@@ -6,6 +6,7 @@ toolchain go1.22.3
 
 require (
 	github.com/IBM/sarama v1.43.2
+	github.com/google/uuid v1.3.0
 	github.com/wailsapp/wails/v2 v2.8.2
 )
 
@@ -18,7 +19,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect

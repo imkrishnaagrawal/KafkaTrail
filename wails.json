@@ -9,5 +9,11 @@
   "author": {
     "name": "Krishna Agrawal",
     "email": "imkrishnaagrawal@gmail.com"
+  },
+  "info": {
+    "companyName": "Kafka Trail",
+    "productName": "Kafka Trail",
+    "productVersion": "0.0.1",
+    "comments": "Kafka Trail is a tool to visualize and analyze the data in Kafka topics."
   }
 }

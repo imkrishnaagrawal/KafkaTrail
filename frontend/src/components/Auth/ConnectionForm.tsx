@@ -28,8 +28,6 @@ export const ConnectionForm: React.FC<ConnectionFormProps> = ({connectionName}) 
 
   useEffect(() => {
     if (connectionName && connections) {
-      console.log({ ...connections[connectionName] });
-
       form.setFieldsValue({ ...connections[connectionName] });
       setProtocol(connections[connectionName].protocol);
     } else {

@@ -12,7 +12,7 @@ export const LoginScreen: React.FC = () => {
   return (
     <Layout hasSider>
       <PanelGroup autoSaveId='sidebarLayout1' direction='horizontal'>
-        <Panel defaultSize={30}>
+        <Panel defaultSize={25}>
           <ConnectionList />
         </Panel>
         <PanelResizeHandle />

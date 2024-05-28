@@ -4,6 +4,7 @@ import {FetchSettings} from '@/store/configSlice';
 import {RootState} from '.';
 import { FetchMessages,FetchMeta, FetchTopics, GetTopicSettings, ProduceMessage} from '@wails/main/KafkaService';
 import {main} from '@wails/models';
+import { LogError } from '@wails-runtime';
 
 export interface KafkaMessage {
   topic: string;
@@ -68,7 +69,7 @@ export const getTopicConfig = createAsyncThunk(
       ]);
       return response;
     } catch (error: any) {
-      console.log('Error', error.message);
+      LogError(error?.message);
 
       return thunkAPI.rejectWithValue(error.message);
     }
@@ -90,7 +91,7 @@ export const produceMessage = createAsyncThunk(
       ]);
       return topics;
     } catch (error: any) {
-      console.log('Error', error.message);
+      LogError(error?.message);
 
       return thunkAPI.rejectWithValue(error.message);
     }
@@ -113,7 +114,7 @@ export const fetchTopics = createAsyncThunk(
       ]);
       return topics;
     } catch (error: any) {
-      console.log('Error', error.message);
+      LogError(error?.message);
 
       return thunkAPI.rejectWithValue(error.message);
     }
@@ -127,13 +128,13 @@ export const fetchTopicMeta = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-      console.log('Fetch data', currentConnection);
+
 
       let config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-      console.log('Fetch Data');
+
 
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {
@@ -163,13 +164,13 @@ export const fetchTopicData = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-      console.log('Fetch data', currentConnection);
+
 
       let config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-      console.log('Fetch Data');
+
 
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {

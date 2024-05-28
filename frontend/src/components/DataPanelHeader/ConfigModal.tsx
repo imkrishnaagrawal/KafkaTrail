@@ -19,7 +19,6 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
   const [settings, setSettings] = useState(initialSettings);
 
   useEffect(() => {
-    console.log('initialSettings', initialSettings);
     setSettings(initialSettings);
   }, [initialSettings]);
 

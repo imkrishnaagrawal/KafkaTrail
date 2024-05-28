@@ -1,6 +1,10 @@
 import {RootState, useAppDispatch} from '@/store';
 import {setOffset, setMessageCount, setPanelShow} from '@/store/configSlice';
-import {fetchTopicData, fetchTopicMeta, getTopicConfig} from '@/store/dataSlice';
+import {
+  fetchTopicData,
+  fetchTopicMeta,
+  getTopicConfig,
+} from '@/store/dataSlice';
 import {
   Flex,
   Tag,
@@ -22,10 +26,11 @@ import {
   InsertRowAboveOutlined,
   PlusOutlined,
   SettingOutlined,
-  SyncOutlined
+  SyncOutlined,
 } from '@ant-design/icons';
 import ProduceMessageModal from './ProduceMessageModal';
 import ConfigModal from './ConfigModal';
+import {LogError} from '@wails-runtime';
 
 interface DataPanelHeaderProps {
   setSearchTerm: any;
@@ -48,7 +53,8 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
     setSearchTerm(value);
   };
 
-  const [isProduceMessageModalOpen, setProduceMessageModalOpen] = React.useState(false);
+  const [isProduceMessageModalOpen, setProduceMessageModalOpen] =
+    React.useState(false);
   const [isConfigModalOpen, setConfigModalOpen] = React.useState(false);
 
   const dispatch = useAppDispatch();
@@ -65,8 +71,8 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
           fetchSettings,
         })
       );
-    } catch (error) {
-      console.error('Error invoking Fetch Data function:', error);
+    } catch (error: any) {
+      LogError('Error invoking Fetch Data function:' + error?.message);
     }
   };
 
@@ -82,8 +88,8 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
           fetchSettings,
         })
       );
-    } catch (error) {
-      console.error('Error invoking Fetch Meta function:', error);
+    } catch (error: any) {
+      LogError('Error invoking Fetch Data function:' + error?.message);
     }
   };
 
@@ -113,19 +119,26 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               ? topicsMap[currentTopic]?.message_count
               : 'NA'}
           </Tag>
-          <Tooltip placement="bottom" title={(currentTopic &&
-              currentTopic in topicsMap &&
-              topicsMap[currentTopic]?.partitions?.map((c, index) => `partition ${index}: ${c.toString()}\n`)?.reduce((p, c) => {
-                return  p + c ;
-              })) ||
-              'NA'} >
-          <Tag color='yellow' >
-            partition count:{' '}
-            {(currentTopic &&
-              currentTopic in topicsMap &&
-              topicsMap[currentTopic]?.partition_count) ||
-              'NA'}
-          </Tag>
+          <Tooltip
+            placement='bottom'
+            title={
+              (currentTopic &&
+                currentTopic in topicsMap &&
+                topicsMap[currentTopic]?.partitions
+                  ?.map((c, index) => `partition ${index}: ${c.toString()}\n`)
+                  ?.reduce((p, c) => {
+                    return p + c;
+                  })) ||
+              'NA'
+            }
+          >
+            <Tag color='yellow'>
+              partition count:{' '}
+              {(currentTopic &&
+                currentTopic in topicsMap &&
+                topicsMap[currentTopic]?.partition_count) ||
+                'NA'}
+            </Tag>
           </Tooltip>
           <Button
             disabled={!currentTopic}
@@ -135,11 +148,15 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               height: 21,
               // backgroundColor: 'rgb(83, 159, 115)',
               width: 21,
-              padding: 10
+              padding: 10,
             }}
-            icon={<SyncOutlined  style={{
-              color: 'grey',
-            }}/>}
+            icon={
+              <SyncOutlined
+                style={{
+                  color: 'grey',
+                }}
+              />
+            }
             size={'middle'}
             onClick={() => {
               fetchMeta();
@@ -247,17 +264,29 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
             icon={<SettingOutlined />}
             size={'middle'}
             onClick={() => {
-              dispatch(getTopicConfig({
-                currentConnection,
-                topic: currentTopic,
-              } as any)).then(() => {
+              dispatch(
+                getTopicConfig({
+                  currentConnection,
+                  topic: currentTopic,
+                } as any)
+              ).then(() => {
                 setConfigModalOpen(true);
               });
-
             }}
           />
-         <ProduceMessageModal isModalOpen={isProduceMessageModalOpen} setIsModalOpen={setProduceMessageModalOpen} />
-         <ConfigModal isModalOpen={isConfigModalOpen} setIsModalOpen={setConfigModalOpen} initialSettings={ currentTopic && topicsMap[currentTopic]?.config ? topicsMap[currentTopic].config : []} />
+          <ProduceMessageModal
+            isModalOpen={isProduceMessageModalOpen}
+            setIsModalOpen={setProduceMessageModalOpen}
+          />
+          <ConfigModal
+            isModalOpen={isConfigModalOpen}
+            setIsModalOpen={setConfigModalOpen}
+            initialSettings={
+              currentTopic && topicsMap[currentTopic]?.config
+                ? topicsMap[currentTopic].config
+                : []
+            }
+          />
         </Space>
       </Header>
     </>

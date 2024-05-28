@@ -22,7 +22,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@wails/*": ["./wailsjs/go/*"],
-      "@wails-runtime/*": ["./wailsjs/runtime/runtime"]
+      "@wails-runtime": ["./wailsjs/runtime/runtime"]
     }
   },
   "include": [

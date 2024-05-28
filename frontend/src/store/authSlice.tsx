@@ -4,20 +4,6 @@ import { ValidateConnection } from '@wails/main/KafkaService';
 import {main} from '@wails/models'
 
 
-// export interface KafkaConfig {
-//   connectionName: string;
-//   bootstrapServers: string;
-//   autoOffsetReset: OFFSET;
-//   groupId: string;
-//   protocol: KAFKA_PROTOCOL;
-//   saslMechanism: SASL_MECHANISM;
-//   lastUsed?: string;
-//   saslUsername?: string;
-//   saslPassword?: string;
-//   configFile?: string;
-//   isTestConnection?: boolean;
-// }
-
 export const DefaultKafkaConfig = {
   autoOffsetReset: 'latest',
   groupId: 'kafka-trail',
@@ -62,8 +48,7 @@ export const login = createAsyncThunk(
         group_id: currentConfig.groupId,
         auto_offset_reset: currentConfig.autoOffsetReset,
       };
-      // await invoke('validate_connection', {config: config});
-      ValidateConnection(config);
+      await ValidateConnection(config);
       return currentConfig;
     } catch (error: any) {
       return thunkAPI.rejectWithValue({

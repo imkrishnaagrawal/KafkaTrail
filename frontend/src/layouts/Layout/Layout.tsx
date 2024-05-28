@@ -11,7 +11,7 @@ export const Layout2: React.FC = () => {
     <Layout hasSider>
       <PanelGroup autoSaveId='sidebarLayout2' direction='horizontal'>
         <SideMenu />
-        <Panel>
+        <Panel defaultSize={25}>
           <TopicSideMenu />
         </Panel>
         <PanelResizeHandle />

@@ -1,5 +1,5 @@
 import { RootState, useAppDispatch } from '@/store';
-import { produceMessage } from '@/store/dataSlice';
+import { fetchTopicData, produceMessage } from '@/store/dataSlice';
 import { Modal, Flex, Input, Button, Form } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React from 'react';
@@ -21,16 +21,23 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({isModalOpen, s
       (state: RootState) => state.dataPanel
     );
     const {currentConnection} = useSelector((state: RootState) => state.auth);
+    const {fetchSettings} = useSelector((state: RootState) => state.config);
 
 
     const handleOk = async () => {
         await form.validateFields()
-        if (currentConnection){
+        if (currentConnection && currentTopic){
           await dispatch(produceMessage({
             currentConnection,
             message: {...form.getFieldsValue(), topic: currentTopic},
           }))
-          // await fetchData()
+          await dispatch(
+            fetchTopicData({
+              currentConnection,
+              currentTopic,
+              fetchSettings,
+            })
+          );
         }
         setIsModalOpen(false);
       };

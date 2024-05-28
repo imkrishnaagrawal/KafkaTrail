@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"time"
 
 	"github.com/IBM/sarama"
 )
@@ -277,8 +278,10 @@ func (k *KafkaService) GetTopicSettings(config KafkaConfig, topic string) (map[s
 
 func getClientConfig(config KafkaConfig) *sarama.Config {
 	clientConfig := sarama.NewConfig()
-	// clientConfig.ClientID = "kafka-trial"
-	// clientConfig.Version = sarama.V
+	clientConfig.ClientID = "kafka-trial"
+	clientConfig.Metadata.Timeout = 10 * time.Second
+	clientConfig.Admin.Timeout = 10 * time.Second
+	clientConfig.Producer.Timeout = 10 * time.Second
 	if config.Protocol == "SASL_SSL" {
 		clientConfig.Net.SASL.Enable = true
 		clientConfig.Net.SASL.Mechanism = sarama.SASLTypePlaintext

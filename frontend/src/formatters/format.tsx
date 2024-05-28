@@ -99,7 +99,6 @@ class FormatterAdapter {
       }
     } catch (error) {}
     const formatter = this.formatters[format];
-    console.log('formatter', formatter);
     if (formatter) {
       return formatter.format(data);
     } else {

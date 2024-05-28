@@ -8,7 +8,7 @@ import {ReloadOutlined, CopyOutlined} from '@ant-design/icons';
 import {RootState, useAppDispatch} from '@/store';
 import {useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
-import { ClipboardSetText } from '@wails-runtime/runtime'
+import { ClipboardSetText, LogError } from '@wails-runtime';
 interface Props {
   // Add your component props here
 }
@@ -74,7 +74,6 @@ const TopicSideMenu: React.FC<Props> = () => {
           icon={<ReloadOutlined />}
           size={'middle'}
           onClick={() => {
-            console.log('Fetch Topics', currentConnection);
             if (currentConnection) {
               dispatch(fetchTopics(currentConnection));
             }
@@ -94,9 +93,8 @@ const TopicSideMenu: React.FC<Props> = () => {
               let item = topics.join('\n')
              try {
               await ClipboardSetText(item)
-             } catch (error) {
-                console.log(error);
-
+             } catch (error: any) {
+                LogError(error?.message);
              }
             }
           }}
