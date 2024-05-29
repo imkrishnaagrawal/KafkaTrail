@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"slices"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -27,6 +28,7 @@ type KafkaMessage struct {
 	Partition int32       `json:"partition"`
 	Headers   []HeaderArg `json:"headers"`
 	Size      int64       `json:"size"`
+	KeySize   int64       `json:"key_size"`
 }
 
 type TopicData struct {
@@ -235,13 +237,16 @@ func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, partition
 				Partition: msg.Partition,
 				Headers:   headers,
 				Size:      int64(len(msg.Value)),
+				KeySize:   int64(len(msg.Key)),
 			}
 
 			messages = append(messages, kafkaMessage)
 
 		}
 	}
-
+	if offsetLatest {
+		slices.Reverse(messages)
+	}
 	return &TopicData{
 		Metadata: *topicMeta,
 		Messages: messages,

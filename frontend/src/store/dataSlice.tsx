@@ -275,6 +275,7 @@ const dataSlice = createSlice({
           message_count: meta.message_count,
           partition_count: meta.partition_count,
           partitions  : meta.partitions,
+          messages: state.topicsMap[topic]?.messages || [],
           config: {}
         };
         state.loading = false;

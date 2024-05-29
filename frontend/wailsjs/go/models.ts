@@ -53,6 +53,7 @@ export namespace main {
 	    partition: number;
 	    headers: HeaderArg[];
 	    size: number;
+	    key_size: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new KafkaMessage(source);
@@ -68,6 +69,7 @@ export namespace main {
 	        this.partition = source["partition"];
 	        this.headers = this.convertValues(source["headers"], HeaderArg);
 	        this.size = source["size"];
+	        this.key_size = source["key_size"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
