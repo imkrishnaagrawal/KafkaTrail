@@ -1,13 +1,19 @@
 // configSlice.ts
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {DATA_FIELD, DATA_FORMAT, OFFSET} from '@/types/types';
+import { main } from '@wails/models';
+
+
 
 export interface FetchSettings {
   autoOffsetReset: OFFSET;
+  offset: number;
+  partition: main.PartitionSettings;
   messageCount: number;
   panelShow: boolean;
   dataFormat: DATA_FORMAT;
   dataField: DATA_FIELD;
+
 }
 interface ConfigState {
   fetchSettings: FetchSettings;
@@ -19,6 +25,12 @@ interface ConfigState {
 const initialState: ConfigState = {
   fetchSettings: {
     autoOffsetReset: 'latest',
+    offset: -1,
+    partition: {
+      partition: -1,
+      high: -1,
+      offset: -1,
+    },
     messageCount: 50,
     panelShow: true,
     dataFormat: 'JSON',
@@ -33,8 +45,24 @@ const configSlice = createSlice({
   initialState,
 
   reducers: {
-    setOffset(state, action: PayloadAction<any>) {
+    setOffsetType(state, action: PayloadAction<any>) {
       state.fetchSettings.autoOffsetReset = action.payload;
+      if (action.payload !== 'offset') {
+        state.fetchSettings.offset = -1;
+        state.fetchSettings.partition = {
+          partition: -1,
+          high: -1,
+          offset: -1,
+        };
+      }
+    },
+
+    setPartition(state, action: PayloadAction<any>) {
+
+      state.fetchSettings.partition = {
+        ...state.fetchSettings.partition,
+        ...action.payload,
+      };
     },
     setMessageCount(state, action: PayloadAction<any>) {
       state.fetchSettings.messageCount = action.payload;
@@ -60,9 +88,10 @@ const configSlice = createSlice({
 });
 
 export const {
+  setPartition,
+  setOffsetType,
   fetchConfigStart,
   fetchConfigFailure,
-  setOffset,
   setMessageCount,
   setPanelShow,
   setDataFormat,

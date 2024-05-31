@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, PayloadAction, Slice} from '@reduxjs/toolkit';
 import {DefaultKafkaConfig} from '@/store/authSlice';
 import {FetchSettings} from '@/store/configSlice';
 import {RootState} from '.';
@@ -141,7 +141,7 @@ export const fetchTopicMeta = createAsyncThunk(
           setTimeout(resolve, 1000);
         }),
 
-        FetchMeta(config, currentTopic, 0, fetchSettings.messageCount),
+        FetchMeta(config, currentTopic, fetchSettings.messageCount),
       ]);
       let topicMeta = {
         message_count: response.message_count,
@@ -170,14 +170,16 @@ export const fetchTopicData = createAsyncThunk(
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-
+      console.log('fetching data', fetchSettings?.partition);
 
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {
           setTimeout(resolve, 1000);
         }),
 
-        FetchMessages(config, currentTopic, 0, fetchSettings.messageCount, fetchSettings.autoOffsetReset == 'latest'),
+
+
+        FetchMessages(config, currentTopic, fetchSettings.messageCount, fetchSettings.autoOffsetReset == 'latest', fetchSettings?.partition),
       ]);
       let topicData = {
         message_count: response.metadata.message_count,

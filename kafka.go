@@ -61,6 +61,12 @@ type ProducerMessage struct {
 	Headers []HeaderArg `json:"headers,omitempty"`
 }
 
+type PartitionSettings struct {
+	Partition int   `json:"partition"`
+	High      int64 `json:"high"`
+	Offset    int64 `json:"offset"`
+}
+
 type KafkaService struct {
 }
 
@@ -158,7 +164,7 @@ func CalculateOffset(p PartitionMeta, count int64, offsetLatest bool, partitionC
 	return offset, count / partitionCount
 }
 
-func (k *KafkaService) FetchMeta(config KafkaConfig, topic string, partition int32, count int64) (*TopicMeta, error) {
+func (k *KafkaService) FetchMeta(config KafkaConfig, topic string, count int64) (*TopicMeta, error) {
 	client, err := createClient(config)
 	if err != nil {
 		return nil, err
@@ -197,53 +203,72 @@ func (k *KafkaService) FetchMeta(config KafkaConfig, topic string, partition int
 	}, nil
 }
 
-func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, partition int32, count int64, offsetLatest bool) (*TopicData, error) {
+func (k *KafkaService) ConsumerFetch(consumer sarama.Consumer, topic string, pIndex int, offset int64, fetchCount int64) ([]KafkaMessage, error) {
+	messages := make([]KafkaMessage, 0)
+
+	pc, err := consumer.ConsumePartition(topic, int32(pIndex), offset)
+	if err != nil {
+		return nil, err
+	}
+	defer pc.Close()
+
+	for i := int64(0); i < fetchCount; i++ {
+
+		msg := <-pc.Messages()
+
+		headers := make([]HeaderArg, len(msg.Headers))
+		for i, h := range msg.Headers {
+			headers[i] = HeaderArg{Key: string(h.Key), Value: string(h.Value)}
+		}
+
+		kafkaMessage := KafkaMessage{
+			Topic:     msg.Topic,
+			Offset:    msg.Offset,
+			Value:     string(msg.Value),
+			Key:       string(msg.Key),
+			Timestamp: msg.Timestamp.Unix(),
+			Partition: msg.Partition,
+			Headers:   headers,
+			Size:      int64(len(msg.Value)),
+			KeySize:   int64(len(msg.Key)),
+		}
+
+		messages = append(messages, kafkaMessage)
+
+	}
+	return messages, nil
+}
+
+func (k *KafkaService) FetchMessages(config KafkaConfig, topic string, count int64, offsetLatest bool, fetchPartition PartitionSettings) (*TopicData, error) {
 	consumer, err := createConsumer(config)
 	if err != nil {
 		return nil, err
 	}
 	defer consumer.Close()
 
-	topicMeta, err := k.FetchMeta(config, topic, partition, count)
+	topicMeta, err := k.FetchMeta(config, topic, count)
 	if err != nil {
 		return nil, err
 	}
 
 	messages := make([]KafkaMessage, 0)
-	for pIndex, p := range topicMeta.Partitions {
-		offset, fetchCount := CalculateOffset(p, count, offsetLatest, int64(len(topicMeta.Partitions)))
-
-		pc, err := consumer.ConsumePartition(topic, int32(pIndex), offset)
-		if err != nil {
-			return nil, err
+	if fetchPartition.Partition != -1 && fetchPartition.Offset != -1 && fetchPartition.High != -1 {
+		p := topicMeta.Partitions[fetchPartition.Partition]
+		if p.High-fetchPartition.Offset < count {
+			count = p.High - fetchPartition.Offset
 		}
-		defer pc.Close()
+		messageBatch, _ := k.ConsumerFetch(consumer, topic, fetchPartition.Partition, fetchPartition.Offset, count)
+		messages = append(messages, messageBatch...)
+	} else {
 
-		for i := int64(0); i < fetchCount; i++ {
-
-			msg := <-pc.Messages()
-
-			headers := make([]HeaderArg, len(msg.Headers))
-			for i, h := range msg.Headers {
-				headers[i] = HeaderArg{Key: string(h.Key), Value: string(h.Value)}
-			}
-
-			kafkaMessage := KafkaMessage{
-				Topic:     msg.Topic,
-				Offset:    msg.Offset,
-				Value:     string(msg.Value),
-				Key:       string(msg.Key),
-				Timestamp: msg.Timestamp.Unix(),
-				Partition: msg.Partition,
-				Headers:   headers,
-				Size:      int64(len(msg.Value)),
-				KeySize:   int64(len(msg.Key)),
-			}
-
-			messages = append(messages, kafkaMessage)
-
+		for pIndex, p := range topicMeta.Partitions {
+			offset, fetchCount := CalculateOffset(p, count, offsetLatest, int64(len(topicMeta.Partitions)))
+			messageBatch, _ := k.ConsumerFetch(consumer, topic, pIndex, offset, fetchCount)
+			messages = append(messages, messageBatch...)
 		}
+
 	}
+
 	if offsetLatest {
 		slices.Reverse(messages)
 	}

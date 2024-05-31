@@ -18,7 +18,7 @@
 		  "-gcflags",
 		  "all=-N -l",
 		  "-o",
-		  "build/bin/kafka-trail.app"
+		  "build/bin/KafkaTrail.app"
 		]
 	  }
 	]

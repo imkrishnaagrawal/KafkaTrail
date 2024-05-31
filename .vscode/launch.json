@@ -2,11 +2,11 @@
     "version": "0.2.0",
     "configurations": [
       {
-        "name": "Wails: Debug kafka-trail.app",
+        "name": "Wails: Debug KafkaTrail.app",
         "type": "go",
         "request": "launch",
         "mode": "exec",
-        "program": "${workspaceFolder}/build/bin/kafka-trail.app/kafka-trail",
+        "program": "${workspaceFolder}/build/bin/KafkaTrail.app/kafka-trail",
         "preLaunchTask": "build",
         "cwd": "${workspaceFolder}",
         "env": {}

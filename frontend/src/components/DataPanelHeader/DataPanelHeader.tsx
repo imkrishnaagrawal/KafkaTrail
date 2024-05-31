@@ -1,5 +1,10 @@
 import {RootState, useAppDispatch} from '@/store';
-import {setOffset, setMessageCount, setPanelShow} from '@/store/configSlice';
+import {
+  setOffsetType,
+  setMessageCount,
+  setPanelShow,
+  setPartition,
+} from '@/store/configSlice';
 import {
   fetchTopicData,
   fetchTopicMeta,
@@ -125,8 +130,8 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               (currentTopic &&
                 currentTopic in topicsMap &&
                 topicsMap[currentTopic]?.partitions
-                  ?.map((c, index) => `partition ${index}: ${c.toString()}\n`)
-                  ?.reduce((p, c) => {
+                  ?.map((c: any, index: number) => `partition ${index}: ${c.toString()}\n`)
+                  ?.reduce((p: any, c: any) => {
                     return p + c;
                   })) ||
               'NA'
@@ -204,18 +209,62 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
 
           <Select
             value={fetchSettings?.autoOffsetReset}
-            onChange={(value: any) => {
-              dispatch(setOffset(value));
+            onChange={async (value: any) => {
+              if (value == 'offset') {
+                await fetchMeta();
+              }
+              dispatch(setOffsetType(value));
             }}
           >
             <Select.Option value='earliest'>Oldest</Select.Option>
             <Select.Option value='latest'>Newest</Select.Option>
+            <Select.Option disabled={!currentTopic} value='offset'>
+              Offset
+            </Select.Option>
           </Select>
+          {fetchSettings?.autoOffsetReset == 'offset' && (
+            <Select
+              disabled={loading}
+              style={{
+                width: 150,
+              }}
+              onChange={async (index: any) => {
+                if (currentTopic) {
+                  dispatch(setPartition({
+                    partition: index,
+                    high: topicsMap[currentTopic]?.partitions![index],
+                  }));
+                }
+              }}
+            >
+              {currentTopic &&
+                topicsMap[currentTopic]?.partitions?.map((p: any, index:  number) => (
+                  <Select.Option value={index}>
+                    Partition {index}: {p}
+                  </Select.Option>
+                ))}
+            </Select>
+          )}
+          {fetchSettings?.autoOffsetReset == 'offset' && (
+            <InputNumber
+              // min={0}
+              // defaultValue={fetchSettings?.partition?.offset}
+              // max={fetchSettings?.partition?.offset}
+              disabled={fetchSettings?.partition.partition === undefined}
+              placeholder='offset'
+              onChange={(value: any) => {
+                dispatch(setPartition({
+                  offset: value
+                }));
+              }}
+            />
+          )}
 
           <InputNumber
             min={1}
             max={2000}
             defaultValue={fetchSettings?.messageCount}
+            placeholder='message count'
             onChange={async (value: any) => {
               await dispatch(setMessageCount(value));
             }}

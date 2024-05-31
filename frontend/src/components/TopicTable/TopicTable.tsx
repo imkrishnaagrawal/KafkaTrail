@@ -14,7 +14,7 @@ interface DataType {
   headers: string[];
 }
 
-const columns: TableProps<DataType>['columns'] = [
+const initialColumns: TableProps<DataType>['columns'] = [
   {
     title: 'Timestamp',
     dataIndex: 'timestamp',
@@ -87,19 +87,17 @@ export const TopicTable: React.FC<TopicDataProps> = ({
   isLoading,
   searchTerm,
 }) => {
-  const [resizeableColumns, setResizeableColumns] = useState(columns);
-
-  useEffect(() => {
-    setResizeableColumns(
-      columns.map((col: any) => {
-        col.onHeaderCell = () => ({
-          width: col.width,
-          onResize: handleResize(col),
-        });
-        return col;
+  const [columns, setColumns] = useState(
+    initialColumns.map((col) => ({
+      ...col,
+      onHeaderCell: (column: { width: any; }) => ({
+        width: column.width,
+        onResize: handleResize(column)
       })
-    );
-  }, [resizeableColumns]);
+    }))
+  );
+
+
 
   const onSelectRow = (offset: any) => {
     if (!currentTopic || !(currentTopic in topicsMap)) {
@@ -116,30 +114,30 @@ export const TopicTable: React.FC<TopicDataProps> = ({
     }
   };
 
-  let components = {
+  const components = {
     header: {
-      cell: ResizableTitle,
-    },
+      cell: ResizableTitle
+    }
   };
 
-  const handleResize =
-    (column: any) =>
-    (e: any, {size}: any) => {
-      resizeableColumns.forEach((item: any) => {
-        if (item === column) {
-          item.width = size.width;
+  const handleResize = (column: any) => (e: any, { size }: any) => {
+    setColumns((prevColumns) =>
+      prevColumns.map((col) => {
+        if (col.key === column.key) {
+          return { ...col, width: size.width };
         }
-      });
+        return col;
+      })
+    );
+  };
 
-      setResizeableColumns(resizeableColumns);
-    };
 
   return (
     <Table
       loading={isLoading}
       rowKey={'offset'}
       components={components}
-      columns={resizeableColumns}
+      columns={columns as any}
       onRow={(record: any, index) => ({
         tabIndex: index,
         onClick: () => {

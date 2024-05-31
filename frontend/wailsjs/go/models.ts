@@ -106,6 +106,22 @@ export namespace main {
 	        this.count = source["count"];
 	    }
 	}
+	export class PartitionSettings {
+	    partition: number;
+	    high: number;
+	    offset: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new PartitionSettings(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.partition = source["partition"];
+	        this.high = source["high"];
+	        this.offset = source["offset"];
+	    }
+	}
 	export class ProducerMessage {
 	    topic: string;
 	    key?: string;

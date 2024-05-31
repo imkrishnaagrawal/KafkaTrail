@@ -12,7 +12,7 @@ export type SASL_MECHANISM =
   | 'OAUTHBEARER'
   | 'AWS-MSK-IAM';
 
-export type OFFSET = 'earliest' | 'latest';
+export type OFFSET = 'earliest' | 'latest' | 'offset';
 
 export type DATA_FORMAT = 'JSON' | 'XML' | 'TEXT' | 'HEX';
 
