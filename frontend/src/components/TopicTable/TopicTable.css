@@ -1,3 +1,25 @@
 .selectedRow:focus {
   background-color: rgb(217, 230, 230) !important;
 }
+
+.react-resizable {
+  position: relative;
+  background-clip: padding-box;
+
+}
+
+.ant-table-header {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
+.react-resizable-handle {
+  position: absolute;
+  right: -5px;
+  bottom: 0;
+  z-index: 1;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+}

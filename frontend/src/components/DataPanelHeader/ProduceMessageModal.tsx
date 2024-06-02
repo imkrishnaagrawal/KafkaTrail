@@ -1,28 +1,29 @@
-import {RootState, useAppDispatch} from '@/store';
-import {fetchTopicData, produceMessage} from '@/store/dataSlice';
-import {Modal, Flex, Input, Button, Form} from 'antd';
+/* eslint-disable react/jsx-no-useless-fragment */
+import { Modal, Flex, Input, Button, Form } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React from 'react';
-import {useSelector} from 'react-redux';
-import {CloseOutlined} from '@ant-design/icons';
+import { useSelector } from 'react-redux';
+import { CloseOutlined } from '@ant-design/icons';
+import { fetchTopicData, produceMessage } from '@/store/dataSlice';
+import { RootState, useAppDispatch } from '@/store';
 
 interface ProduceMessageModalProps {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
+function ProduceMessageModal({
   isModalOpen,
   setIsModalOpen,
-}) => {
+}: ProduceMessageModalProps) {
   const [form] = Form.useForm();
   const dispatch = useAppDispatch();
   useSelector((state: RootState) => state.config);
-  const {currentTopic, loading} = useSelector(
+  const { currentTopic, loading } = useSelector(
     (state: RootState) => state.dataPanel
   );
-  const {currentConnection} = useSelector((state: RootState) => state.auth);
-  const {fetchSettings} = useSelector((state: RootState) => state.config);
+  const { currentConnection } = useSelector((state: RootState) => state.auth);
+  const { fetchSettings } = useSelector((state: RootState) => state.config);
 
   const handleOk = async () => {
     await form.validateFields();
@@ -54,8 +55,8 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
 
   return (
     <Modal
-      getContainer={'#content-panel'}
-      title='Producer'
+      getContainer="#content-panel"
+      title="Producer"
       open={isModalOpen}
       maskClosable={!loading}
       confirmLoading={loading}
@@ -65,26 +66,26 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
       <>
         <Form
           form={form}
-          name='message-form'
-          autoComplete='off'
-          initialValues={{items: [{}]}}
-          layout='vertical'
+          name="message-form"
+          autoComplete="off"
+          initialValues={{ items: [{}] }}
+          layout="vertical"
         >
-          <Form.Item label='Key' name='key' style={{width: '100%'}}>
+          <Form.Item label="Key" name="key" style={{ width: '100%' }}>
             <TextArea />
           </Form.Item>
 
           <Form.Item
-            label='Value'
-            name='value'
-            style={{width: '100%'}}
-            rules={[{required: true, message: 'value is required required'}]}
+            label="Value"
+            name="value"
+            style={{ width: '100%' }}
+            rules={[{ required: true, message: 'value is required required' }]}
           >
             <TextArea />
           </Form.Item>
 
           {/* Nest Form.List */}
-          <Form.Item name='headers' label='Headers'>
+          <Form.Item name="headers" label="Headers">
             <Form.List name={['headers']}>
               {(subFields, subOpt) => (
                 <div
@@ -104,7 +105,7 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
                       }}
                     >
                       <Form.Item
-                        style={{flex: 2}}
+                        style={{ flex: 2 }}
                         name={[subField.name, 'key']}
                         rules={[
                           {
@@ -113,10 +114,10 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
                           },
                         ]}
                       >
-                        <Input placeholder='key' />
+                        <Input placeholder="key" />
                       </Form.Item>
                       <Form.Item
-                        style={{flexGrow: 3, flex: 3}}
+                        style={{ flexGrow: 3, flex: 3 }}
                         name={[subField.name, 'value']}
                         rules={[
                           {
@@ -125,7 +126,7 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
                           },
                         ]}
                       >
-                        <Input placeholder='value' />
+                        <Input placeholder="value" />
                       </Form.Item>
                       <Form.Item
                         style={{
@@ -134,13 +135,13 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
                         name={[subField.name, 'value']}
                       >
                         <Button
-                          type='primary'
+                          type="primary"
                           style={{
                             height: 30,
                             width: 31,
                           }}
                           icon={<CloseOutlined />}
-                          size={'middle'}
+                          size="middle"
                           onClick={() => {
                             subOpt.remove(subField.name);
                           }}
@@ -148,7 +149,7 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
                       </Form.Item>
                     </Flex>
                   ))}
-                  <Button type='dashed' onClick={() => subOpt.add()} block>
+                  <Button type="dashed" onClick={() => subOpt.add()} block>
                     + Add Header
                   </Button>
                 </div>
@@ -159,6 +160,6 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
       </>
     </Modal>
   );
-};
+}
 
 export default ProduceMessageModal;

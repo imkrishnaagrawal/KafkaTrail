@@ -1,37 +1,34 @@
-import {fetchTopics, setCurrentTopic} from '@/store/dataSlice';
 // import {writeText} from '@tauri-apps/api/clipboard';
-import {Space, Button, Tag, Affix, List} from 'antd';
-import Search, {SearchProps} from 'antd/es/input/Search';
+import { Space, Button, Tag, Affix, List } from 'antd';
+import Search, { SearchProps } from 'antd/es/input/Search';
 import Sider from 'antd/es/layout/Sider';
-import React, {useEffect, useState} from 'react';
-import {ReloadOutlined, CopyOutlined} from '@ant-design/icons';
-import {RootState, useAppDispatch} from '@/store';
-import {useSelector} from 'react-redux';
-import {useNavigate} from 'react-router-dom';
-import {ClipboardSetText, LogError} from '@wails-runtime';
-interface Props {
-  // Add your component props here
-}
+import React, { useEffect, useState } from 'react';
+import { ReloadOutlined, CopyOutlined } from '@ant-design/icons';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { ClipboardSetText, LogError } from '@wails-runtime';
+import { RootState, useAppDispatch } from '@/store';
+import { fetchTopics, setCurrentTopic } from '@/store/dataSlice';
 
-const TopicSideMenu: React.FC<Props> = () => {
-  const {topicsMap, loading, currentTopic} = useSelector(
+export function TopicSideMenu() {
+  const { topicsMap, loading, currentTopic } = useSelector(
     (state: RootState) => state.dataPanel
   );
 
-  const {currentConnection} = useSelector((state: RootState) => state.auth);
+  const { currentConnection } = useSelector((state: RootState) => state.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [searchPattern, setSearchPattern] = useState<RegExp>();
   const [topics, setTopics] = useState<string[]>([]);
-  const onSearch: SearchProps['onSearch'] = (value, _e, _info) => {
+  const onSearch: SearchProps['onSearch'] = (value) => {
     setSearchTerm(value);
     setSearchPattern(new RegExp(value));
   };
 
   useEffect(() => {
-    let filteredTopic = Object.keys(topicsMap).filter(
+    const filteredTopic = Object.keys(topicsMap).filter(
       (v: string) => v.includes(searchTerm) || searchPattern?.test(v)
     );
     setTopics(filteredTopic);
@@ -43,12 +40,12 @@ const TopicSideMenu: React.FC<Props> = () => {
     } else {
       navigate('/');
     }
-  }, [currentConnection]);
+  }, [currentConnection, dispatch, navigate]);
 
   return (
     <Sider
-      theme='light'
-      width={'100%'}
+      theme="light"
+      width="100%"
       style={{
         height: '100vh',
         display: 'flex',
@@ -65,14 +62,14 @@ const TopicSideMenu: React.FC<Props> = () => {
       >
         <Button
           loading={loading}
-          type='primary'
+          type="primary"
           style={{
             height: 30,
             backgroundColor: 'rgb(136, 99, 123)',
             width: 31,
           }}
           icon={<ReloadOutlined />}
-          size={'middle'}
+          size="middle"
           onClick={() => {
             if (currentConnection) {
               dispatch(fetchTopics(currentConnection));
@@ -80,21 +77,21 @@ const TopicSideMenu: React.FC<Props> = () => {
           }}
         />
         <Button
-          type='primary'
+          type="primary"
           style={{
             height: 30,
             backgroundColor: 'rgb(46, 62, 101)',
             width: 31,
           }}
           icon={<CopyOutlined />}
-          size={'middle'}
+          size="middle"
           onClick={async () => {
             if (currentConnection) {
-              let item = topics.join('\n');
+              const item = topics.join('\n');
               try {
                 await ClipboardSetText(item);
-              } catch (error: any) {
-                LogError(error?.message);
+              } catch (e) {
+                LogError((e as Error)?.message);
               }
             }
           }}
@@ -105,8 +102,8 @@ const TopicSideMenu: React.FC<Props> = () => {
           borderBottom: '1px solid rgb(237, 237, 237)',
         }}
       >
-        <Search className='search' placeholder='Search' onSearch={onSearch} />
-        <Tag color='processing'>topics: {topics?.length}</Tag>
+        <Search className="search" placeholder="Search" onSearch={onSearch} />
+        <Tag color="processing">topics: {topics?.length}</Tag>
       </Space>
 
       <Affix
@@ -119,12 +116,12 @@ const TopicSideMenu: React.FC<Props> = () => {
       >
         <List
           loading={loading}
-          itemLayout='horizontal'
+          itemLayout="horizontal"
           dataSource={topics}
           style={{
             maxHeight: 35,
           }}
-          renderItem={(item: any) => (
+          renderItem={(item) => (
             <List.Item
               style={{
                 // background: 'white',
@@ -132,7 +129,7 @@ const TopicSideMenu: React.FC<Props> = () => {
                 cursor: 'pointer',
                 overflowX: 'hidden',
                 background:
-                  item == currentTopic ? 'rgb(237, 237, 237)' : 'white',
+                  item === currentTopic ? 'rgb(237, 237, 237)' : 'white',
               }}
               onClick={() => {
                 dispatch(setCurrentTopic(item));
@@ -145,6 +142,4 @@ const TopicSideMenu: React.FC<Props> = () => {
       </Affix>
     </Sider>
   );
-};
-
-export default TopicSideMenu;
+}

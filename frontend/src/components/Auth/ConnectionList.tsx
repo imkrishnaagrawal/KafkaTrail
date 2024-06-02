@@ -1,30 +1,26 @@
-import {Affix, List, Popconfirm, Button, theme} from 'antd';
+import { Affix, List, Popconfirm, Button, theme } from 'antd';
 import Sider from 'antd/es/layout/Sider';
 import Avvvatars from 'avvvatars-react';
-import React from 'react';
-import {deleteConnection, login} from '@/store/authSlice';
-import {useSelector, useDispatch} from 'react-redux';
-import {RootState, AppDispatch} from '@/store';
-import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
-import {useNavigate} from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { main } from '@wails/models';
+import { RootState, AppDispatch } from '@/store';
+import { deleteConnection, login } from '@/store/authSlice';
 
-interface ConnectionListProps {
-  // Define the props for the component here
-}
-
-const ConnectionList: React.FC<ConnectionListProps> = () => {
-  const {connections} = useSelector((state: RootState) => state.auth);
+function ConnectionList() {
+  const { connections } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
   const {
-    token: {colorBgContainer},
+    token: { colorBgContainer },
   } = theme.useToken();
 
   return (
     <Sider
-      theme='light'
-      width={'100%'}
+      theme="light"
+      width="100%"
       style={{
         height: '100vh',
         display: 'flex',
@@ -53,8 +49,8 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
         }}
       >
         <Button
-          type='default'
-          style={{margin: '10px 10px 10px 10px'}}
+          type="default"
+          style={{ margin: '10px 10px 10px 10px' }}
           onClick={() => {
             navigate(`/login`);
           }}
@@ -70,12 +66,12 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
         }}
       >
         <List
-          itemLayout='horizontal'
+          itemLayout="horizontal"
           dataSource={Object.values(connections)}
           style={{
             background: colorBgContainer,
           }}
-          renderItem={(item: any) => (
+          renderItem={(item: main.KafkaConfig) => (
             <List.Item
               style={{
                 border: '1px solid rgb(237, 237, 237)',
@@ -84,21 +80,23 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
               }}
               actions={[
                 <Popconfirm
-                  title='Delete the task'
-                  description='Are you sure to delete this task?'
-                  placement='bottomRight'
-                  okText='Yes'
-                  cancelText='No'
+                  key={item?.connectionName}
+                  title="Delete the task"
+                  description="Are you sure to delete this task?"
+                  placement="bottomRight"
+                  okText="Yes"
+                  cancelText="No"
                   onConfirm={() => {
                     dispatch(deleteConnection(item));
                   }}
                 >
-                  <Button danger icon={<DeleteOutlined />} size={'middle'} />
+                  <Button danger icon={<DeleteOutlined />} size="middle" />
                 </Popconfirm>,
                 <Button
-                  type='default'
+                  key={item?.connectionName}
+                  type="default"
                   icon={<EditOutlined />}
-                  size={'middle'}
+                  size="middle"
                   onClick={() => {
                     navigate(`/login/${item?.connectionName}`);
                   }}
@@ -109,11 +107,18 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
                 style={{
                   padding: '5px 10px',
                 }}
-                avatar={<Avvvatars value={item?.connectionName} />}
+                avatar={<Avvvatars value={item.connectionName || 'I'} />}
                 title={
                   <div
+                    tabIndex={0}
+                    role="button"
                     style={{
                       cursor: 'pointer',
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        dispatch(login(item));
+                      }
                     }}
                     onClick={() => {
                       dispatch(login(item));
@@ -130,6 +135,6 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
       </Affix>
     </Sider>
   );
-};
+}
 
 export default ConnectionList;

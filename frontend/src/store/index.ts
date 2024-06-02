@@ -1,18 +1,19 @@
 // store.ts
 import {
   Action,
+  Middleware,
   ThunkAction,
   combineReducers,
   configureStore,
 } from '@reduxjs/toolkit';
-import configReducer from './configSlice';
-import authReducer from './authSlice';
-import dataPanelReducer from './dataSlice';
-import {persistStore, persistReducer} from 'redux-persist';
+import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
-import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
-import {thunk} from 'redux-thunk';
-import {LogInfo} from '@wails-runtime';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { thunk } from 'redux-thunk';
+import { LogInfo } from '@wails-runtime';
+import dataPanelReducer from './dataSlice';
+import authReducer from './authSlice';
+import configReducer from './configSlice';
 
 const persistConfig = {
   key: 'debug-101',
@@ -20,9 +21,9 @@ const persistConfig = {
   whitelist: ['auth'],
 };
 
-const customMiddleWare = (_store: any) => (next: any) => (action: any) => {
+const actionLogger: Middleware = () => (next) => (action) => {
   LogInfo(`redux action: ${JSON.stringify(action)}`);
-  next(action);
+  return next(action);
 };
 
 const rootReducer = combineReducers({
@@ -40,7 +41,7 @@ const store = configureStore({
       serializableCheck: false,
     })
       .concat(thunk)
-      .concat(customMiddleWare),
+      .concat(actionLogger),
   devTools: true,
 });
 
@@ -58,5 +59,8 @@ export type AppThunk<ReturnType = void> = ThunkAction<
   Action
 >;
 
+export const selectCurrentTopic = (state: RootState) =>
+  state.dataPanel.currentTopic;
+export const selectTopics = (state: RootState) => state.dataPanel.topicsMap;
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

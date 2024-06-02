@@ -1,12 +1,5 @@
-import {
-  createAsyncThunk,
-  createSlice,
-  PayloadAction,
-  Slice,
-} from '@reduxjs/toolkit';
-import {DefaultKafkaConfig} from '@/store/authSlice';
-import {FetchSettings} from '@/store/configSlice';
-import {RootState} from '.';
+/* eslint-disable no-param-reassign */
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import {
   FetchMessages,
   FetchMeta,
@@ -14,15 +7,17 @@ import {
   GetTopicSettings,
   ProduceMessage,
 } from '@wails/main/KafkaService';
-import {main} from '@wails/models';
-import {LogError} from '@wails-runtime';
+import { main } from '@wails/models';
+import { LogError } from '@wails-runtime';
+import { DefaultKafkaConfig } from '@/store/authSlice';
+import { FetchSettings } from '@/store/configSlice';
 
-export interface KafkaMessage {
+export interface KafkaMessage extends main.KafkaMessage {
   topic: string;
   offset: number;
   value: string;
   key: string;
-  timestamp: string;
+  timestamp: number;
   partition: number;
 }
 
@@ -31,12 +26,13 @@ interface TopicData {
   partition_count?: number;
   partitions?: number[];
   messages?: KafkaMessage[];
-  config: any;
+  config: Record<string, string>;
 }
 
+export type TopicMap = { [key: string]: TopicData };
 interface DataPanelState {
   currentTopic?: string;
-  topicsMap: {[key: string]: TopicData};
+  topicsMap: TopicMap;
   loading: boolean;
   error: string | null;
 }
@@ -59,43 +55,48 @@ export interface FetchTopicConfigArgs {
 
 export const getTopicConfig = createAsyncThunk(
   'app/getTopicConfig',
-  async ({topic, currentConnection}: FetchTopicConfigArgs, thunkAPI) => {
-    let config = {
+  async ({ topic, currentConnection }: FetchTopicConfigArgs, thunkAPI) => {
+    const config = {
       ...DefaultKafkaConfig,
       ...currentConnection,
     };
     try {
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       const [_, response] = await Promise.all([
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        }),
         GetTopicSettings(config, topic),
       ]);
       return response;
-    } catch (error: any) {
-      LogError(error?.message);
+    } catch (error) {
+      LogError((error as Error).message);
 
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
 
 export const produceMessage = createAsyncThunk(
   'app/produceMessage',
-  async ({currentConnection, message}: ProduceMessageArgs, thunkAPI) => {
+  async ({ currentConnection, message }: ProduceMessageArgs, thunkAPI) => {
     try {
-      let config = {
+      const config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       const [_, topics] = await Promise.all([
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        }),
         ProduceMessage(config, message),
       ]);
       return topics;
-    } catch (error: any) {
-      LogError(error?.message);
+    } catch (error) {
+      LogError((error as Error).message);
 
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -104,20 +105,22 @@ export const fetchTopics = createAsyncThunk(
   'app/fetchTopics',
   async (currentConfig: main.KafkaConfig, thunkAPI) => {
     try {
-      let config = {
+      const config = {
         ...DefaultKafkaConfig,
         ...currentConfig,
       };
-
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       const [_, topics] = await Promise.all([
-        new Promise((resolve) => setTimeout(resolve, 1000)),
+        new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        }),
         FetchTopics(config),
       ]);
       return topics;
-    } catch (error: any) {
-      LogError(error?.message);
+    } catch (error) {
+      LogError((error as Error).message);
 
-      return thunkAPI.rejectWithValue(error.message);
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -125,15 +128,15 @@ export const fetchTopics = createAsyncThunk(
 export const fetchTopicMeta = createAsyncThunk(
   'app/fetchTopicMeta',
   async (
-    {currentTopic, currentConnection, fetchSettings}: FetchTopicDataArgs,
+    { currentTopic, currentConnection, fetchSettings }: FetchTopicDataArgs,
     thunkAPI
   ) => {
     try {
-      let config = {
+      const config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {
           setTimeout(resolve, 1000);
@@ -141,15 +144,15 @@ export const fetchTopicMeta = createAsyncThunk(
 
         FetchMeta(config, currentTopic, fetchSettings.messageCount),
       ]);
-      let topicMeta = {
+      const topicMeta = {
         message_count: response.message_count,
         partition_count: response.partition_count,
         partitions: response.partitions.map((p) => p.count),
       };
 
       return [currentTopic, topicMeta];
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -157,16 +160,15 @@ export const fetchTopicMeta = createAsyncThunk(
 export const fetchTopicData = createAsyncThunk(
   'app/fetchTopicData',
   async (
-    {currentTopic, currentConnection, fetchSettings}: FetchTopicDataArgs,
+    { currentTopic, currentConnection, fetchSettings }: FetchTopicDataArgs,
     thunkAPI
   ) => {
     try {
-      let config = {
+      const config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-      console.log('fetching data', fetchSettings?.partition);
-
+      // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {
           setTimeout(resolve, 1000);
@@ -176,11 +178,11 @@ export const fetchTopicData = createAsyncThunk(
           config,
           currentTopic,
           fetchSettings.messageCount,
-          fetchSettings.autoOffsetReset == 'latest',
+          fetchSettings.autoOffsetReset === 'latest',
           fetchSettings?.partition
         ),
       ]);
-      let topicData = {
+      const topicData = {
         message_count: response.metadata.message_count,
         partition_count: response.metadata.partition_count,
         partitions: response.metadata.partitions.map((p) => p.count),
@@ -188,8 +190,8 @@ export const fetchTopicData = createAsyncThunk(
       };
 
       return [currentTopic, topicData];
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.message);
+    } catch (error) {
+      return thunkAPI.rejectWithValue((error as Error).message);
     }
   }
 );
@@ -204,14 +206,14 @@ const dataSlice = createSlice({
   name: 'data',
   initialState,
   reducers: {
-    setCurrentTopic(state, action: PayloadAction<any>) {
+    setCurrentTopic(state, action) {
       state.currentTopic = action.payload;
       state.loading = false;
       state.error = null;
     },
   },
   extraReducers: (builder) => {
-    builder.addCase(fetchTopics.fulfilled, (state, action: any) => {
+    builder.addCase(fetchTopics.fulfilled, (state, action) => {
       state.error = null;
       state.topicsMap = {};
       action.payload
@@ -222,91 +224,89 @@ const dataSlice = createSlice({
           };
         });
       state.loading = false;
-    }),
-      builder.addCase(fetchTopics.pending, (state, _action: any) => {
-        state.loading = true;
-        state.error = null;
-      }),
-      builder.addCase(fetchTopics.rejected, (state, _action: any) => {
-        state.loading = false;
-        state.error = 'Failed To Fetch Topics';
-      }),
-      builder.addCase(getTopicConfig.fulfilled, (state, action: any) => {
-        let config = action.payload;
-        if (state.currentTopic) {
-          state.topicsMap[state.currentTopic] = {
-            ...state.topicsMap[state.currentTopic],
-            config: config,
-          };
-        }
-        state.loading = false;
-        state.error = null;
-      }),
-      builder.addCase(getTopicConfig.pending, (state, _action: any) => {
-        state.loading = true;
-        state.error = null;
-      }),
-      builder.addCase(getTopicConfig.rejected, (state, _action: any) => {
-        state.loading = false;
-        state.error = 'Failed To Fetch Configs';
-      }),
-      builder.addCase(fetchTopicData.fulfilled, (state, action: any) => {
-        const [topic, meta] = action.payload as [string, any];
-        state.topicsMap[topic] = {
-          message_count: meta.message_count,
-          partition_count: meta.partition_count,
-          messages: meta.messages,
-          partitions: meta.partitions,
-          config: {},
+    });
+    builder.addCase(fetchTopics.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchTopics.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Failed To Fetch Topics';
+    });
+    builder.addCase(getTopicConfig.fulfilled, (state, action) => {
+      const config = action.payload;
+      if (state.currentTopic) {
+        state.topicsMap[state.currentTopic] = {
+          ...state.topicsMap[state.currentTopic],
+          config,
         };
-        state.loading = false;
-        state.error = null;
-      }),
-      builder.addCase(fetchTopicData.pending, (state, _action: any) => {
-        state.loading = true;
-        state.error = null;
-      }),
-      builder.addCase(fetchTopicData.rejected, (state, _action: any) => {
-        state.loading = false;
-        state.error = 'Failed To Fetch Data';
-      }),
-      builder.addCase(fetchTopicMeta.fulfilled, (state, action: any) => {
-        const [topic, meta] = action.payload as [string, any];
-        state.topicsMap[topic] = {
-          message_count: meta.message_count,
-          partition_count: meta.partition_count,
-          partitions: meta.partitions,
-          messages: state.topicsMap[topic]?.messages || [],
-          config: {},
-        };
-        state.loading = false;
-        state.error = null;
-      }),
-      builder.addCase(fetchTopicMeta.pending, (state, _action: any) => {
-        state.loading = true;
-        state.error = null;
-      }),
-      builder.addCase(fetchTopicMeta.rejected, (state, _action: any) => {
-        state.loading = false;
-        state.error = 'Failed To Fetch Topic Meta';
-      }),
-      builder.addCase(produceMessage.fulfilled, (state, _action: any) => {
-        state.loading = false;
-        state.error = null;
-      }),
-      builder.addCase(produceMessage.pending, (state, _action: any) => {
-        state.loading = true;
-        state.error = null;
-      }),
-      builder.addCase(produceMessage.rejected, (state, _action: any) => {
-        state.loading = false;
-        state.error = 'Failed To Produce Message';
-      });
+      }
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(getTopicConfig.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(getTopicConfig.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Failed To Fetch Configs';
+    });
+    builder.addCase(fetchTopicData.fulfilled, (state, action) => {
+      const [topic, meta] = action.payload as [string, TopicData];
+      state.topicsMap[topic] = {
+        message_count: meta.message_count,
+        partition_count: meta.partition_count,
+        messages: meta.messages,
+        partitions: meta.partitions,
+        config: {},
+      };
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchTopicData.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchTopicData.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Failed To Fetch Data';
+    });
+    builder.addCase(fetchTopicMeta.fulfilled, (state, action) => {
+      const [topic, meta] = action.payload as [string, TopicData];
+      state.topicsMap[topic] = {
+        message_count: meta.message_count,
+        partition_count: meta.partition_count,
+        partitions: meta.partitions,
+        messages: state.topicsMap[topic]?.messages || [],
+        config: {},
+      };
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(fetchTopicMeta.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(fetchTopicMeta.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Failed To Fetch Topic Meta';
+    });
+    builder.addCase(produceMessage.fulfilled, (state) => {
+      state.loading = false;
+      state.error = null;
+    });
+    builder.addCase(produceMessage.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(produceMessage.rejected, (state) => {
+      state.loading = false;
+      state.error = 'Failed To Produce Message';
+    });
   },
 });
 
-export const {setCurrentTopic} = dataSlice.actions;
-export const selectCurrentTopic = (state: RootState) =>
-  state.dataPanel.currentTopic;
-export const selectTopics = (state: RootState) => state.dataPanel.topicsMap;
+export const { setCurrentTopic } = dataSlice.actions;
+
 export default dataSlice.reducer;

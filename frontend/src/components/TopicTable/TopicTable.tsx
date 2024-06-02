@@ -1,20 +1,13 @@
-import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {Table} from 'antd';
-import type {TableProps} from 'antd';
+import { useState } from 'react';
+import { Table } from 'antd';
+import type { TableColumnsType, TableProps } from 'antd';
 import './TopicTable.css';
-import {Resizable} from 'react-resizable';
-import '../../../node_modules/react-resizable/css/styles.css';
+// import 'react-resizable/css/styles.css';
+import { ResizeCallbackData } from 'react-resizable';
+import { ResizableTitle } from './ResizableTitle';
+import { KafkaMessage, TopicMap } from '@/store/dataSlice';
 
-interface DataType {
-  key: string;
-  partition: string;
-  offset: number;
-  value: string;
-  timestamp: number;
-  headers: string[];
-}
-
-const initialColumns: TableProps<DataType>['columns'] = [
+const initialColumns: TableProps<KafkaMessage>['columns'] = [
   {
     title: 'Timestamp',
     dataIndex: 'timestamp',
@@ -22,8 +15,8 @@ const initialColumns: TableProps<DataType>['columns'] = [
     sorter: (a, b) => a.timestamp - b.timestamp,
     ellipsis: true,
     width: 100,
-    render: (text: any) => {
-      let date = new Date(parseInt(text) * 1000);
+    render: (text) => {
+      const date = new Date(parseInt(text, 10) * 1000);
       return <span>{date.toLocaleString()}</span>;
     },
   },
@@ -56,56 +49,44 @@ const initialColumns: TableProps<DataType>['columns'] = [
     dataIndex: 'value',
     key: 'value',
     ellipsis: true,
-    width: 200,
+    // width: 200,
   },
 ];
+
 interface TopicDataProps {
-  currentTopic: any;
-  topicsMap: any;
+  currentTopic: string | undefined;
+  topicsMap: TopicMap;
   isLoading: boolean;
-  searchTerm: any;
+  searchTerm: string;
   height: number;
-  onRowChange: (value: any) => any;
+  onRowChange: (value: unknown) => void;
 }
 
-const ResizableTitle = (props: any) => {
-  const {onResize, width, ...restProps} = props;
-  if (width === undefined) {
-    return <th {...restProps}></th>;
-  }
-  return (
-    <Resizable width={width} height={0} onResize={onResize}>
-      <th {...restProps}></th>
-    </Resizable>
-  );
-};
-export const TopicTable: React.FC<TopicDataProps> = ({
+export function TopicTable({
   currentTopic,
   topicsMap,
   onRowChange,
   isLoading,
   searchTerm,
   height,
-}) => {
-  const [columns, setColumns] = useState(
-    initialColumns.map((col) => ({
-      ...col,
-      onHeaderCell: (column: {width: any}) => ({
-        width: column.width,
-        onResize: handleResize(column),
-      }),
-    }))
+}: TopicDataProps) {
+  const [columns, setColumns] = useState<TableColumnsType<KafkaMessage>>(
+    initialColumns ?? []
   );
 
-  const onSelectRow = (offset: any) => {
+  const onSelectRow = (offset: number) => {
     if (!currentTopic || !(currentTopic in topicsMap)) {
       return;
     }
-    let record = topicsMap![currentTopic]?.messages?.filter(
-      (v: any) => v.offset == offset
+    const record = topicsMap![currentTopic]?.messages?.filter(
+      (v) => v.offset === offset
     )[0];
+
     try {
-      let jsonObj = JSON.parse(record);
+      if (!record) {
+        throw new Error('Record not found');
+      }
+      const jsonObj = JSON.parse(JSON.stringify(record));
       onRowChange(jsonObj);
     } catch (error) {
       onRowChange(record);
@@ -119,49 +100,68 @@ export const TopicTable: React.FC<TopicDataProps> = ({
   };
 
   const handleResize =
-    (column: any) =>
-    (e: any, {size}: any) => {
-      setColumns((prevColumns) =>
-        prevColumns.map((col) => {
-          if (col.key === column.key) {
-            return {...col, width: size.width};
-          }
-          return col;
-        })
-      );
+    (index: number) =>
+    (_: React.SyntheticEvent<Element>, { size }: ResizeCallbackData) => {
+      const newColumns = [...columns];
+      newColumns[index] = {
+        ...newColumns[index],
+        width: size.width,
+      };
+      setColumns(newColumns);
     };
+
+  const mergedColumns = columns.map<TableColumnsType<KafkaMessage>[number]>(
+    (col, index) => ({
+      ...col,
+      onHeaderCell: (column: TableColumnsType<KafkaMessage>[number]) => ({
+        width: column.width,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onResize: handleResize(index) as React.ReactEventHandler<any>,
+      }),
+    })
+  );
 
   return (
     <Table
       virtual
       loading={isLoading}
-      rowKey={'offset'}
+      rowKey="offset"
       components={components}
-      columns={columns as any}
-      onRow={(record: any, index) => ({
+      columns={mergedColumns}
+      onRow={(record, index) => ({
         tabIndex: index,
         onClick: () => {
-          onSelectRow(record['offset']);
+          onSelectRow(record.offset);
         },
-        onKeyDown: (e: any) => {
+        onKeyDown: (e) => {
           e.preventDefault();
+
           try {
-            if (index == undefined) {
+            if (index === undefined) {
               return;
             }
             if (e.key === 'ArrowUp' && index > 0) {
-              e.target.previousSibling.focus();
+              e.currentTarget.previousSibling.focus();
+
               onSelectRow(
-                e.target.previousSibling.getAttribute('data-row-key')
+                parseInt(
+                  e.currentTarget.previousSibling.getAttribute('data-row-key'),
+                  10
+                )
               );
             }
-
             if (
               e.key === 'ArrowDown' &&
-              index < topicsMap![currentTopic]?.messages?.length!
+              currentTopic &&
+              index < (topicsMap![currentTopic]?.messages?.length ?? 0)
             ) {
-              e.target.nextSibling.focus();
-              onSelectRow(e.target.nextSibling.getAttribute('data-row-key'));
+              e.currentTarget.nextSibling.focus();
+              onSelectRow(
+                parseInt(
+                  e.currentTarget.nextSibling.getAttribute('data-row-key'),
+                  10
+                )
+              );
             }
           } catch (err) {
             // failure
@@ -172,13 +172,13 @@ export const TopicTable: React.FC<TopicDataProps> = ({
       pagination={false}
       dataSource={
         currentTopic
-          ? topicsMap![currentTopic]?.messages?.filter((v: any) => {
+          ? topicsMap![currentTopic]?.messages?.filter((v) => {
               return JSON.stringify(v).includes(searchTerm);
             }) || []
           : []
       }
-      scroll={{y: height}}
-      size='small'
+      scroll={{ y: height }}
+      size="small"
     />
   );
-};
+}

@@ -1,16 +1,16 @@
-// configSlice.ts
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {DATA_FIELD, DATA_FORMAT, OFFSET} from '@/types/types';
-import {main} from '@wails/models';
+/* eslint-disable no-param-reassign */
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { main } from '@wails/models';
+import { DataField, DataFormat, Offset } from '@/types/types';
 
 export interface FetchSettings {
-  autoOffsetReset: OFFSET;
+  autoOffsetReset: Offset;
   offset: number;
   partition: main.PartitionSettings;
   messageCount: number;
   panelShow: boolean;
-  dataFormat: DATA_FORMAT;
-  dataField: DATA_FIELD;
+  dataFormat: DataFormat;
+  dataField: DataField;
 }
 interface ConfigState {
   fetchSettings: FetchSettings;
@@ -41,7 +41,7 @@ const configSlice = createSlice({
   initialState,
 
   reducers: {
-    setOffsetType(state, action: PayloadAction<any>) {
+    setOffsetType(state, action) {
       state.fetchSettings.autoOffsetReset = action.payload;
       if (action.payload !== 'offset') {
         state.fetchSettings.offset = -1;
@@ -53,22 +53,22 @@ const configSlice = createSlice({
       }
     },
 
-    setPartition(state, action: PayloadAction<any>) {
+    setPartition(state, action) {
       state.fetchSettings.partition = {
         ...state.fetchSettings.partition,
         ...action.payload,
       };
     },
-    setMessageCount(state, action: PayloadAction<any>) {
+    setMessageCount(state, action) {
       state.fetchSettings.messageCount = action.payload;
     },
-    setPanelShow(state, action: PayloadAction<any>) {
+    setPanelShow(state, action) {
       state.fetchSettings.panelShow = action.payload;
     },
-    setDataFormat(state, action: PayloadAction<any>) {
+    setDataFormat(state, action) {
       state.fetchSettings.dataFormat = action.payload;
     },
-    setDataField(state, action: PayloadAction<any>) {
+    setDataField(state, action) {
       state.fetchSettings.dataField = action.payload;
     },
     fetchConfigStart(state) {

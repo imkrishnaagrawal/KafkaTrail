@@ -1,21 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {Table, Modal} from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Table, Modal } from 'antd';
 
 interface ConfigModalProps {
   initialSettings: Record<string, string>;
-  //   onSave: (settings: Record<string, string>) => void;
-  //   onCancel: () => void;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const ConfigModal: React.FC<ConfigModalProps> = ({
+function ConfigModal({
   initialSettings,
   //   onSave,
   //   onCancel,
   isModalOpen,
   setIsModalOpen,
-}) => {
+}: ConfigModalProps) {
   const [settings, setSettings] = useState(initialSettings);
 
   useEffect(() => {
@@ -57,6 +55,9 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
     },
   ];
 
+  if (!settings) {
+    return null;
+  }
   const dataSource = Object.entries(settings).map(([key, value]) => ({
     key,
     value,
@@ -64,8 +65,8 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
 
   return (
     <Modal
-      getContainer={'#content-panel'}
-      title='Config'
+      getContainer="#content-panel"
+      title="Config"
       open={isModalOpen}
       confirmLoading={false}
       onOk={handleSave}
@@ -76,9 +77,9 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
         overflow: 'hidden',
       }}
     >
-      <div style={{display: 'flex', height: '60vh'}}>
+      <div style={{ display: 'flex', height: '60vh' }}>
         <Table
-          size='small'
+          size="small"
           columns={columns}
           dataSource={dataSource}
           pagination={false}
@@ -89,6 +90,6 @@ const ConfigModal: React.FC<ConfigModalProps> = ({
       </div>
     </Modal>
   );
-};
+}
 
 export default ConfigModal;

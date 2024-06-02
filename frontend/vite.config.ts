@@ -1,4 +1,4 @@
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import * as path from 'path';
 
@@ -11,8 +11,8 @@ export default defineConfig({
         find: '@wails-runtime',
         replacement: path.resolve(__dirname, 'wailsjs/runtime'),
       },
-      {find: '@wails', replacement: path.resolve(__dirname, 'wailsjs/go')},
-      {find: '@', replacement: path.resolve(__dirname, 'src')},
+      { find: '@wails', replacement: path.resolve(__dirname, 'wailsjs/go') },
+      { find: '@', replacement: path.resolve(__dirname, 'src') },
     ],
   },
 });

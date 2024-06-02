@@ -1,10 +1,8 @@
-export type KAFKA_PROTOCOL =
-  | 'SASL_PLAINTEXT'
-  | 'SASL_SSL'
-  | 'PLAINTEXT'
-  | 'SSL';
+import { KafkaMessage } from '@/store/dataSlice';
 
-export type SASL_MECHANISM =
+export type KafkaProtocol = 'SASL_PLAINTEXT' | 'SASL_SSL' | 'PLAINTEXT' | 'SSL';
+
+export type SaslMechanism =
   | 'PLAIN'
   | 'GSSAPI'
   | 'SCRAM-SHA-256'
@@ -12,14 +10,14 @@ export type SASL_MECHANISM =
   | 'OAUTHBEARER'
   | 'AWS-MSK-IAM';
 
-export type OFFSET = 'earliest' | 'latest' | 'offset';
+export type Offset = 'earliest' | 'latest' | 'offset';
 
-export type DATA_FORMAT = 'JSON' | 'XML' | 'TEXT' | 'HEX';
+export type DataFormat = 'JSON' | 'XML' | 'TEXT' | 'HEX';
 
-export type DATA_FIELD =
-  | 'key'
-  | 'partition'
-  | 'offset'
-  | 'value'
-  | 'timestamp'
-  | 'headers';
+export type DataField = keyof KafkaMessage;
+// | 'key'
+// | 'partition'
+// | 'offset'
+// | 'value'
+// | 'timestamp'
+// | 'headers';

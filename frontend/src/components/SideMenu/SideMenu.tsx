@@ -1,17 +1,17 @@
-import {useAppDispatch} from '@/store';
-import {logout} from '@/store/authSlice';
-import {setCurrentTopic} from '@/store/dataSlice';
-import {Menu, MenuProps} from 'antd';
+import { Menu, MenuProps } from 'antd';
 import Sider from 'antd/es/layout/Sider';
-import React, {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LogoutOutlined,
   DatabaseOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
+import { setCurrentTopic } from '@/store/dataSlice';
+import { logout } from '@/store/authSlice';
+import { useAppDispatch } from '@/store';
 
-const SideMenu: React.FC = () => {
+export function SideMenu() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -51,7 +51,7 @@ const SideMenu: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
   return (
     <Sider
-      theme='light'
+      theme="light"
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
@@ -67,18 +67,18 @@ const SideMenu: React.FC = () => {
         }}
       >
         <Menu
-          theme='light'
+          theme="light"
           defaultSelectedKeys={['1']}
-          mode='inline'
+          mode="inline"
           items={startMenuItems}
           style={{
             borderRight: 'none',
           }}
         />
         <Menu
-          theme='light'
+          theme="light"
           defaultSelectedKeys={['1']}
-          mode='inline'
+          mode="inline"
           items={endMenuItems}
           style={{
             borderRight: 'none',
@@ -87,6 +87,4 @@ const SideMenu: React.FC = () => {
       </div>
     </Sider>
   );
-};
-
-export default SideMenu;
+}

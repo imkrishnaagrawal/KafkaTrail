@@ -1,16 +1,15 @@
-import {formatter} from '@/formatters/format';
-import {RootState, useAppDispatch} from '@/store';
-import {setDataField, setDataFormat} from '@/store/configSlice';
-import {Space, Select, Radio, Table, TableProps, Tag, Button} from 'antd';
-import React from 'react';
-import {useSelector} from 'react-redux';
-import {CopyOutlined} from '@ant-design/icons';
+/* eslint-disable no-nested-ternary */
+import { Space, Select, Radio, Table, TableProps, Tag, Button } from 'antd';
+import { useSelector } from 'react-redux';
+import { CopyOutlined } from '@ant-design/icons';
+import { AnyObject } from 'antd/es/_util/type';
+import { setDataField, setDataFormat } from '@/store/configSlice';
+import { RootState, useAppDispatch } from '@/store';
+import { formatter } from '@/formatters/format';
+import { KafkaMessage } from '@/store/dataSlice';
+import { DataField, DataFormat } from '@/types/types';
 
-interface Props {
-  data: any;
-}
-
-const columns: TableProps<any>['columns'] = [
+const columns: TableProps<AnyObject>['columns'] = [
   {
     title: 'Key',
     dataIndex: 'key',
@@ -25,9 +24,37 @@ const columns: TableProps<any>['columns'] = [
     width: 100,
   },
 ];
-export const DetailView: React.FC<Props> = ({data}) => {
+
+interface DetailViewProps {
+  data: KafkaMessage;
+}
+
+function RenderMessage(
+  data: KafkaMessage,
+  dataField: DataField,
+  dataFormat: DataFormat
+) {
+  if (!data) return 'No data';
+  // eslint-disable-next-line react/destructuring-assignment
+  const value = data[dataField].toString();
+  return dataField === 'value' || dataField === 'key' ? (
+    data && formatter.format(data![dataField], dataFormat)
+  ) : dataField === 'timestamp' ? (
+    <>
+      <div>Unix Timestamp: {value}</div>
+      <div>UTC Date : {new Date(parseInt(value, 10) * 1000).toUTCString()}</div>
+      <div>
+        Local Date : {new Date(parseInt(value, 10) * 1000).toLocaleString()}
+      </div>
+    </>
+  ) : (
+    data && value
+  );
+}
+
+export function DetailView({ data }: DetailViewProps) {
   const dispatch = useAppDispatch();
-  const {dataFormat, dataField} = useSelector(
+  const { dataFormat, dataField } = useSelector(
     (state: RootState) => state.config.fetchSettings
   );
 
@@ -48,13 +75,13 @@ export const DetailView: React.FC<Props> = ({data}) => {
             alignContent: 'center',
           }}
         >
-          <Tag color='cyan'>
+          <Tag color="cyan">
             {' '}
             Size:{' '}
-            {data && data!['size']
-              ? dataField == 'key'
-                ? data!['key_size'] + ' B'
-                : data!['size'] + ' B'
+            {data && data!.size
+              ? dataField === 'key'
+                ? `${data!.key_size} B`
+                : `${data!.size} B`
               : 'N/A'}
           </Tag>
         </span>
@@ -64,37 +91,37 @@ export const DetailView: React.FC<Props> = ({data}) => {
             dispatch(setDataField(e.target.value));
           }}
         >
-          <Radio.Button value='key'>Key</Radio.Button>
-          <Radio.Button value='partition'>Partition</Radio.Button>
-          <Radio.Button value='offset'>Offset</Radio.Button>
-          <Radio.Button value='value'>Value</Radio.Button>
-          <Radio.Button value='timestamp'>Timestamp</Radio.Button>
-          <Radio.Button value='headers'>Headers</Radio.Button>
+          <Radio.Button value="key">Key</Radio.Button>
+          <Radio.Button value="partition">Partition</Radio.Button>
+          <Radio.Button value="offset">Offset</Radio.Button>
+          <Radio.Button value="value">Value</Radio.Button>
+          <Radio.Button value="timestamp">Timestamp</Radio.Button>
+          <Radio.Button value="headers">Headers</Radio.Button>
         </Radio.Group>
         <Space>
           <Select
             value={dataFormat}
-            onChange={(value: any) => {
+            onChange={(value) => {
               dispatch(setDataFormat(value));
             }}
           >
-            <Select.Option value='JSON'>JSON</Select.Option>
-            <Select.Option value='XML'>XML</Select.Option>
-            <Select.Option value='HEX'>HEX</Select.Option>
-            <Select.Option value='TEXT'>TEXT</Select.Option>
+            <Select.Option value="JSON">JSON</Select.Option>
+            <Select.Option value="XML">XML</Select.Option>
+            <Select.Option value="HEX">HEX</Select.Option>
+            <Select.Option value="TEXT">TEXT</Select.Option>
           </Select>
           <Button
-            type='primary'
+            type="primary"
             style={{
               height: 30,
               backgroundColor: 'rgb(118, 126, 163)',
               width: 30,
             }}
             onClick={() => {
-              navigator.clipboard.writeText(data![dataField]);
+              navigator.clipboard.writeText(String(data![dataField]));
             }}
             icon={<CopyOutlined />}
-            size={'middle'}
+            size="middle"
           />
         </Space>
       </div>
@@ -108,13 +135,13 @@ export const DetailView: React.FC<Props> = ({data}) => {
           flex: 1,
         }}
       >
-        {dataField == 'headers' && data?.headers?.length > 0 ? (
+        {dataField === 'headers' && data?.headers?.length > 0 ? (
           <Table
             pagination={false}
             columns={columns}
             dataSource={data?.headers || []}
-            size='small'
-            style={{overflow: 'scroll', flex: 1, marginBottom: 20}}
+            size="small"
+            style={{ overflow: 'scroll', flex: 1, marginBottom: 20 }}
           />
         ) : (
           <pre
@@ -125,28 +152,12 @@ export const DetailView: React.FC<Props> = ({data}) => {
               padding: 10,
             }}
           >
-            {dataField == 'value' || dataField == 'key' ? (
-              data && formatter.format(data![dataField], dataFormat)
-            ) : dataField == 'timestamp' ? (
-              <>
-                <div>Unix Timestamp: {data && data[dataField]}</div>
-                <div>
-                  UTC Date :{' '}
-                  {data && new Date(data[dataField] * 1000).toUTCString()}
-                </div>
-                <div>
-                  Local Date :{' '}
-                  {data && new Date(data[dataField] * 1000).toLocaleString()}
-                </div>
-              </>
-            ) : (
-              data && data[dataField]
-            )}
+            {RenderMessage(data, dataField, dataFormat)}
           </pre>
         )}
       </div>
     </>
   );
-};
+}
 
 export default DetailView;
