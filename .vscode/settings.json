@@ -1,18 +1,19 @@
 {
     "cSpell.words": [
-        "antd",
-        "sarama",
-        "GSSAPI",
-        "OAUTHBEARER",
-        "Sider",
-        "Popconfirm",
-        "Avvvatars",
         "Acks",
-        "geekblue",
-        "persistor",
-        "vkbeautify",
-        "hljs",
+        "antd",
         "Avenir",
+        "Avvvatars",
+        "geekblue",
+        "GSSAPI",
+        "hljs",
+        "OAUTHBEARER",
+        "parsererror",
+        "persistor",
+        "Popconfirm",
+        "sarama",
+        "Sider",
+        "vkbeautify",
         "wailsjs"
     ]
 }

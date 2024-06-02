@@ -127,7 +127,7 @@ export namespace main {
 	    key?: string;
 	    value: string;
 	    headers?: HeaderArg[];
-	    messageCount: number;
+	    messageCount?: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProducerMessage(source);
