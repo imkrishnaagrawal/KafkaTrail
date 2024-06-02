@@ -8,7 +8,7 @@ import {ReloadOutlined, CopyOutlined} from '@ant-design/icons';
 import {RootState, useAppDispatch} from '@/store';
 import {useSelector} from 'react-redux';
 import {useNavigate} from 'react-router-dom';
-import { ClipboardSetText, LogError } from '@wails-runtime';
+import {ClipboardSetText, LogError} from '@wails-runtime';
 interface Props {
   // Add your component props here
 }
@@ -60,9 +60,9 @@ const TopicSideMenu: React.FC<Props> = () => {
       <Space
         style={{
           borderBottom: '1px solid rgb(237, 237, 237)',
+          padding: '10px 20px',
         }}
       >
-        <Search className='search' placeholder='Search' onSearch={onSearch} />
         <Button
           loading={loading}
           type='primary'
@@ -86,22 +86,28 @@ const TopicSideMenu: React.FC<Props> = () => {
             backgroundColor: 'rgb(46, 62, 101)',
             width: 31,
           }}
+
           icon={<CopyOutlined />}
           size={'middle'}
           onClick={async () => {
             if (currentConnection) {
-              let item = topics.join('\n')
-             try {
-              await ClipboardSetText(item)
-             } catch (error: any) {
+              let item = topics.join('\n');
+              try {
+                await ClipboardSetText(item);
+              } catch (error: any) {
                 LogError(error?.message);
-             }
+              }
             }
           }}
         />
-        {/* <Flex gap='4px 0' wrap='wrap'> */}
+      </Space>
+      <Space
+        style={{
+          borderBottom: '1px solid rgb(237, 237, 237)',
+        }}
+      >
+        <Search className='search' placeholder='Search' onSearch={onSearch} />
         <Tag color='processing'>topics: {topics?.length}</Tag>
-        {/* </Flex> */}
       </Space>
 
       <Affix

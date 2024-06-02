@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {Layout} from 'antd';
 import {Content} from 'antd/es/layout/layout';
 import {Panel, PanelGroup, PanelResizeHandle} from 'react-resizable-panels';
@@ -9,17 +9,22 @@ import DetailView from '@/components/DetailView/DetailView';
 import DataPanelHeader from '@/components/DataPanelHeader/DataPanelHeader';
 
 export const TopicScreen: React.FC = () => {
+  const tableRef = useRef<any>(null);
   const ref = useRef<any>(null);
+  const [height, setHeight] = useState(0);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const {fetchSettings} = useSelector((state: RootState) => state.config);
   const {currentTopic, topicsMap, loading} = useSelector(
     (state: RootState) => state.dataPanel
   );
 
-  const [selectedRecord, setselectedRecord] = useState<any>(null);
 
-  const [searchTerm, setSearchTerm] = useState('');
+  useLayoutEffect(() => {
+    if (tableRef.current) setHeight(tableRef.current.offsetHeight - 50);
+  }, [tableRef.current, fetchSettings.panelShow]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (fetchSettings.panelShow && ref != null) {
       ref?.current?.expand();
     } else {
@@ -27,8 +32,8 @@ export const TopicScreen: React.FC = () => {
     }
   }, [fetchSettings.panelShow]);
 
-  useEffect(() => {
-    setselectedRecord('No data is selected');
+  useLayoutEffect(() => {
+    setSelectedRecord('No data is selected');
   }, [currentTopic]);
 
   return (
@@ -40,19 +45,30 @@ export const TopicScreen: React.FC = () => {
           <PanelGroup direction='vertical'>
             <Panel
               maxSize={85}
+              onResize={(size) => {
+                if (tableRef.current) setHeight(tableRef.current.offsetHeight - 50);
+              }}
               style={{
-                overflow: 'scroll',
+                display: 'flex',
               }}
             >
-              <TopicTable
-                isLoading={loading}
-                currentTopic={currentTopic}
-                topicsMap={topicsMap}
-                searchTerm={searchTerm}
-                onRowChange={(record) => {
-                  setselectedRecord(record);
+              <div
+                ref={tableRef}
+                style={{
+                  flex: 1,
                 }}
-              />
+              >
+                <TopicTable
+                  height={height}
+                  isLoading={loading}
+                  currentTopic={currentTopic}
+                  topicsMap={topicsMap}
+                  searchTerm={searchTerm}
+                  onRowChange={(record) => {
+                    setSelectedRecord(record);
+                  }}
+                />
+              </div>
             </Panel>
             <PanelResizeHandle style={{height: 1, background: 'gray'}} />
             <Panel

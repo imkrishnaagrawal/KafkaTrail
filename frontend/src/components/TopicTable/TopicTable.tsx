@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {Table} from 'antd';
 import type {TableProps} from 'antd';
 import './TopicTable.css';
@@ -41,7 +41,6 @@ const initialColumns: TableProps<DataType>['columns'] = [
     key: 'partition',
     width: 100,
     ellipsis: true,
-
   },
   {
     title: 'Offset',
@@ -57,15 +56,15 @@ const initialColumns: TableProps<DataType>['columns'] = [
     dataIndex: 'value',
     key: 'value',
     ellipsis: true,
-    // width: 200,
+    width: 200,
   },
-
 ];
 interface TopicDataProps {
   currentTopic: any;
   topicsMap: any;
   isLoading: boolean;
   searchTerm: any;
+  height: number;
   onRowChange: (value: any) => any;
 }
 
@@ -86,18 +85,18 @@ export const TopicTable: React.FC<TopicDataProps> = ({
   onRowChange,
   isLoading,
   searchTerm,
+  height
 }) => {
+
   const [columns, setColumns] = useState(
     initialColumns.map((col) => ({
       ...col,
-      onHeaderCell: (column: { width: any; }) => ({
+      onHeaderCell: (column: {width: any}) => ({
         width: column.width,
-        onResize: handleResize(column)
-      })
+        onResize: handleResize(column),
+      }),
     }))
   );
-
-
 
   const onSelectRow = (offset: any) => {
     if (!currentTopic || !(currentTopic in topicsMap)) {
@@ -116,69 +115,73 @@ export const TopicTable: React.FC<TopicDataProps> = ({
 
   const components = {
     header: {
-      cell: ResizableTitle
-    }
+      cell: ResizableTitle,
+    },
   };
 
-  const handleResize = (column: any) => (e: any, { size }: any) => {
-    setColumns((prevColumns) =>
-      prevColumns.map((col) => {
-        if (col.key === column.key) {
-          return { ...col, width: size.width };
-        }
-        return col;
-      })
-    );
-  };
-
+  const handleResize =
+    (column: any) =>
+    (e: any, {size}: any) => {
+      setColumns((prevColumns) =>
+        prevColumns.map((col) => {
+          if (col.key === column.key) {
+            return {...col, width: size.width};
+          }
+          return col;
+        })
+      );
+    };
 
   return (
-    <Table
-      loading={isLoading}
-      rowKey={'offset'}
-      components={components}
-      columns={columns as any}
-      onRow={(record: any, index) => ({
-        tabIndex: index,
-        onClick: () => {
-          onSelectRow(record['offset']);
-        },
-        onKeyDown: (e: any) => {
-          e.preventDefault();
-          try {
-            if (index == undefined) {
-              return;
-            }
-            if (e.key === 'ArrowUp' && index > 0) {
-              e.target.previousSibling.focus();
-              onSelectRow(
-                e.target.previousSibling.getAttribute('data-row-key')
-              );
-            }
 
-            if (
-              e.key === 'ArrowDown' &&
-              index < topicsMap![currentTopic]?.messages?.length!
-            ) {
-              e.target.nextSibling.focus();
-              onSelectRow(e.target.nextSibling.getAttribute('data-row-key'));
+      <Table
+        virtual
+        loading={isLoading}
+        rowKey={'offset'}
+        components={components}
+        columns={columns as any}
+        onRow={(record: any, index) => ({
+          tabIndex: index,
+          onClick: () => {
+            onSelectRow(record['offset']);
+          },
+          onKeyDown: (e: any) => {
+            e.preventDefault();
+            try {
+              if (index == undefined) {
+                return;
+              }
+              if (e.key === 'ArrowUp' && index > 0) {
+                e.target.previousSibling.focus();
+                onSelectRow(
+                  e.target.previousSibling.getAttribute('data-row-key')
+                );
+              }
+
+              if (
+                e.key === 'ArrowDown' &&
+                index < topicsMap![currentTopic]?.messages?.length!
+              ) {
+                e.target.nextSibling.focus();
+                onSelectRow(e.target.nextSibling.getAttribute('data-row-key'));
+              }
+            } catch (err) {
+              // failure
             }
-          } catch (err) {
-            // failure
-          }
-        },
-      })}
-      rowClassName={() => 'selectedRow'}
-      pagination={false}
-      dataSource={
-        currentTopic
-          ? topicsMap![currentTopic]?.messages?.filter((v: any) => {
-              return JSON.stringify(v).includes(searchTerm);
-            }) || []
-          : []
-      }
-      scroll={{x: 'false'}}
-      size='small'
-    />
+          },
+        })}
+        rowClassName={() => 'selectedRow'}
+        pagination={false}
+        dataSource={
+          currentTopic
+            ? topicsMap![currentTopic]?.messages?.filter((v: any) => {
+                return JSON.stringify(v).includes(searchTerm);
+              }) || []
+            : []
+        }
+        scroll={{y: height}}
+        size='small'
+      />
+
   );
 };

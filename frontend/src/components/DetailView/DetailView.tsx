@@ -105,11 +105,12 @@ export const DetailView: React.FC<Props> = ({data}) => {
       >
         {dataField == 'headers' && data?.headers?.length > 0 ? (
           <Table
+
             pagination={false}
             columns={columns}
             dataSource={data?.headers || []}
             size='small'
-            scroll={{x: 'false'}}
+
             style={{overflow: 'scroll', flex: 1, marginBottom: 20}}
           />
         ) : (

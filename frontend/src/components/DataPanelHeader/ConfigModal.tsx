@@ -72,9 +72,15 @@ return (
         onOk={handleSave}
         onCancel={handleCancel}
         width={600}
+        style={{
+          height: '80vh',
+          overflow: 'hidden',
+        }}
     >
-        <div style={{ overflow: 'scroll' }}>
-            <Table virtual size='small' columns={columns} dataSource={dataSource} pagination={false} />
+        <div style={{ display:'flex' , height: '60vh' }}>
+            <Table size='small' columns={columns} dataSource={dataSource} pagination={false} scroll={{
+              y: '56vh',
+            }} />
         </div>
     </Modal>
 );

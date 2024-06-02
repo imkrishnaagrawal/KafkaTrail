@@ -127,6 +127,7 @@ export namespace main {
 	    key?: string;
 	    value: string;
 	    headers?: HeaderArg[];
+	    messageCount: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ProducerMessage(source);
@@ -138,6 +139,7 @@ export namespace main {
 	        this.key = source["key"];
 	        this.value = source["value"];
 	        this.headers = this.convertValues(source["headers"], HeaderArg);
+	        this.messageCount = source["messageCount"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

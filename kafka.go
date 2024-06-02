@@ -55,10 +55,11 @@ type HeaderArg struct {
 }
 
 type ProducerMessage struct {
-	Topic   string      `json:"topic"`
-	Key     string      `json:"key,omitempty"`
-	Value   string      `json:"value"`
-	Headers []HeaderArg `json:"headers,omitempty"`
+	Topic        string      `json:"topic"`
+	Key          string      `json:"key,omitempty"`
+	Value        string      `json:"value"`
+	Headers      []HeaderArg `json:"headers,omitempty"`
+	MessageCount int         `json:"messageCount,default=1"`
 }
 
 type PartitionSettings struct {
@@ -97,33 +98,6 @@ func (k *KafkaService) FetchTopics(config KafkaConfig) ([]string, error) {
 	}
 
 	return topics, nil
-}
-
-func (k *KafkaService) ProduceMessage(config KafkaConfig, message ProducerMessage) (string, error) {
-	producer, err := createProducer(config)
-	if err != nil {
-		return "", err
-	}
-	defer producer.Close()
-
-	headers := make([]sarama.RecordHeader, len(message.Headers))
-	for i, h := range message.Headers {
-		headers[i] = sarama.RecordHeader{Key: []byte(h.Key), Value: []byte(h.Value)}
-	}
-
-	msg := &sarama.ProducerMessage{
-		Topic:   message.Topic,
-		Key:     sarama.StringEncoder(message.Key),
-		Value:   sarama.StringEncoder(message.Value),
-		Headers: headers,
-	}
-
-	_, _, err = producer.SendMessage(msg)
-	if err != nil {
-		return "", err
-	}
-
-	return "Message produced", nil
 }
 
 func CalculateOffset(p PartitionMeta, count int64, offsetLatest bool, partitionCount int64) (int64, int64) {
@@ -304,6 +278,34 @@ func (k *KafkaService) GetTopicSettings(config KafkaConfig, topic string) (map[s
 	}
 
 	return settings, nil
+}
+
+func (k *KafkaService) ProduceMessage(config KafkaConfig, message ProducerMessage) (string, error) {
+	producer, err := createProducer(config)
+	if err != nil {
+		return "", err
+	}
+	defer producer.Close()
+
+	headers := make([]sarama.RecordHeader, len(message.Headers))
+	for i, h := range message.Headers {
+		headers[i] = sarama.RecordHeader{Key: []byte(h.Key), Value: []byte(h.Value)}
+	}
+	for i := 0; i < message.MessageCount; i++ {
+		msg := &sarama.ProducerMessage{
+			Topic:   message.Topic,
+			Key:     sarama.StringEncoder(message.Key),
+			Value:   sarama.StringEncoder(message.Value),
+			Headers: headers,
+		}
+
+		_, _, err = producer.SendMessage(msg)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return "Message produced", nil
 }
 
 func getClientConfig(config KafkaConfig) *sarama.Config {

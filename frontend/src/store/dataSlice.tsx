@@ -15,12 +15,7 @@ export interface KafkaMessage {
   partition: number;
 }
 
-export interface ProduceMessage {
-  topic: string;
-  value: string;
-  key: string;
-  headers: [string, string][];
-}
+
 
 
 interface TopicData {
@@ -46,7 +41,7 @@ export interface FetchTopicDataArgs {
 
 export interface ProduceMessageArgs {
   currentConnection: main.KafkaConfig;
-  message: ProduceMessage;
+  message: main.ProducerMessage;
 }
 
 export interface FetchTopicConfigArgs {
@@ -87,7 +82,7 @@ export const produceMessage = createAsyncThunk(
 
       const [_, topics] = await Promise.all([
         new Promise((resolve) => setTimeout(resolve, 1000)),
-        ProduceMessage(config, main.ProducerMessage.createFrom(message)),
+        ProduceMessage(config, message),
       ]);
       return topics;
     } catch (error: any) {
