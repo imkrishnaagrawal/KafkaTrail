@@ -4,7 +4,7 @@ import React from 'react';
 import {ConnectionForm} from '@/components/Auth/ConnectionForm';
 import ConnectionList from '@/components/Auth/ConnectionList';
 import {Panel, PanelGroup, PanelResizeHandle} from 'react-resizable-panels';
-import { useParams } from 'react-router-dom';
+import {useParams} from 'react-router-dom';
 
 export const LoginScreen: React.FC = () => {
   const {connectionName} = useParams();

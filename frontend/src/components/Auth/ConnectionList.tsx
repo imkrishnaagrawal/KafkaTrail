@@ -6,7 +6,7 @@ import {deleteConnection, login} from '@/store/authSlice';
 import {useSelector, useDispatch} from 'react-redux';
 import {RootState, AppDispatch} from '@/store';
 import {DeleteOutlined, EditOutlined} from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 interface ConnectionListProps {
   // Define the props for the component here
@@ -45,19 +45,23 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
       >
         Kafka Trail{' '}
       </div>
-      <div style={{
+      <div
+        style={{
           justifyContent: 'center',
           display: 'flex',
           margin: '10px 0px',
-        }}>
-          <Button
-              type="default"
-              style={{ margin: '10px 10px 10px 10px' }}
-              onClick={() => {
-                navigate(`/login`)
-              }}
-          >New Connection</Button>
-        </div>
+        }}
+      >
+        <Button
+          type='default'
+          style={{margin: '10px 10px 10px 10px'}}
+          onClick={() => {
+            navigate(`/login`);
+          }}
+        >
+          New Connection
+        </Button>
+      </div>
       <Affix
         offsetTop={0}
         style={{
@@ -65,7 +69,6 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
           overflow: 'auto',
         }}
       >
-
         <List
           itemLayout='horizontal'
           dataSource={Object.values(connections)}
@@ -92,9 +95,14 @@ const ConnectionList: React.FC<ConnectionListProps> = () => {
                 >
                   <Button danger icon={<DeleteOutlined />} size={'middle'} />
                 </Popconfirm>,
-                <Button  type="default"  icon={<EditOutlined />} size={'middle'} onClick={() => {
-                  navigate(`/login/${item?.connectionName}`)
-                }}/>
+                <Button
+                  type='default'
+                  icon={<EditOutlined />}
+                  size={'middle'}
+                  onClick={() => {
+                    navigate(`/login/${item?.connectionName}`);
+                  }}
+                />,
               ]}
             >
               <List.Item.Meta

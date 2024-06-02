@@ -9,17 +9,16 @@ interface Formatter {
 
 function highlight(data: string, format: string): any {
   try {
-    const result =  hljs.highlight(data, {
-      language: format,
-      ignoreIllegals: true,
-    })?.value || data
+    const result =
+      hljs.highlight(data, {
+        language: format,
+        ignoreIllegals: true,
+      })?.value || data;
     return (
-      <code dangerouslySetInnerHTML={{__html: result ? result : ''}}>
-
-      </code>
+      <code dangerouslySetInnerHTML={{__html: result ? result : ''}}></code>
     );
   } catch (error) {
-    return data
+    return data;
   }
 }
 
@@ -28,12 +27,11 @@ class JSONFormatter implements Formatter {
     try {
       const jsonData = JSON.parse(data);
       let formatted = vkbeautify.json(jsonData);
-      return highlight(formatted, 'json')
+      return highlight(formatted, 'json');
     } catch (error) {
       return 'Failed to format JSON: Error parsing data';
     }
   }
-
 }
 
 // Implement XML formatter
@@ -46,8 +44,10 @@ class XMLFormatter implements Formatter {
       if (errorNode) {
         return 'Failed to format XML: Error parsing data';
       } else {
-        let formatted = vkbeautify.xml(new XMLSerializer().serializeToString(xmlDoc));
-        return highlight(formatted, 'xml')
+        let formatted = vkbeautify.xml(
+          new XMLSerializer().serializeToString(xmlDoc)
+        );
+        return highlight(formatted, 'xml');
       }
     } catch (error) {
       return 'Failed to format XML: Error parsing data';

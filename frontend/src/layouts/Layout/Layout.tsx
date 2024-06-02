@@ -1,7 +1,7 @@
 import React from 'react';
 import {Layout} from 'antd';
 import {Panel, PanelGroup, PanelResizeHandle} from 'react-resizable-panels';
-import { Outlet } from "react-router-dom";
+import {Outlet} from 'react-router-dom';
 import './Layout.css';
 import TopicSideMenu from '@/components/TopicSideMenu/TopicSideMenu';
 import SideMenu from '@/components/SideMenu/SideMenu';

@@ -130,7 +130,10 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               (currentTopic &&
                 currentTopic in topicsMap &&
                 topicsMap[currentTopic]?.partitions
-                  ?.map((c: any, index: number) => `partition ${index}: ${c.toString()}\n`)
+                  ?.map(
+                    (c: any, index: number) =>
+                      `partition ${index}: ${c.toString()}\n`
+                  )
                   ?.reduce((p: any, c: any) => {
                     return p + c;
                   })) ||
@@ -230,19 +233,23 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               }}
               onChange={async (index: any) => {
                 if (currentTopic) {
-                  dispatch(setPartition({
-                    partition: index,
-                    high: topicsMap[currentTopic]?.partitions![index],
-                  }));
+                  dispatch(
+                    setPartition({
+                      partition: index,
+                      high: topicsMap[currentTopic]?.partitions![index],
+                    })
+                  );
                 }
               }}
             >
               {currentTopic &&
-                topicsMap[currentTopic]?.partitions?.map((p: any, index:  number) => (
-                  <Select.Option value={index}>
-                    Partition {index}: {p}
-                  </Select.Option>
-                ))}
+                topicsMap[currentTopic]?.partitions?.map(
+                  (p: any, index: number) => (
+                    <Select.Option value={index}>
+                      Partition {index}: {p}
+                    </Select.Option>
+                  )
+                )}
             </Select>
           )}
           {fetchSettings?.autoOffsetReset == 'offset' && (
@@ -253,9 +260,11 @@ export const DataPanelHeader: React.FC<DataPanelHeaderProps> = ({
               disabled={fetchSettings?.partition.partition === undefined}
               placeholder='offset'
               onChange={(value: any) => {
-                dispatch(setPartition({
-                  offset: value
-                }));
+                dispatch(
+                  setPartition({
+                    offset: value,
+                  })
+                );
               }}
             />
           )}

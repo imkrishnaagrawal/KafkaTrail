@@ -59,7 +59,7 @@ type ProducerMessage struct {
 	Key          string      `json:"key,omitempty"`
 	Value        string      `json:"value"`
 	Headers      []HeaderArg `json:"headers,omitempty"`
-	MessageCount int         `json:"messageCount,default=1"`
+	MessageCount int         `json:"messageCount,omitempty"`
 }
 
 type PartitionSettings struct {

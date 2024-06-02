@@ -85,9 +85,8 @@ export const TopicTable: React.FC<TopicDataProps> = ({
   onRowChange,
   isLoading,
   searchTerm,
-  height
+  height,
 }) => {
-
   const [columns, setColumns] = useState(
     initialColumns.map((col) => ({
       ...col,
@@ -133,55 +132,53 @@ export const TopicTable: React.FC<TopicDataProps> = ({
     };
 
   return (
-
-      <Table
-        virtual
-        loading={isLoading}
-        rowKey={'offset'}
-        components={components}
-        columns={columns as any}
-        onRow={(record: any, index) => ({
-          tabIndex: index,
-          onClick: () => {
-            onSelectRow(record['offset']);
-          },
-          onKeyDown: (e: any) => {
-            e.preventDefault();
-            try {
-              if (index == undefined) {
-                return;
-              }
-              if (e.key === 'ArrowUp' && index > 0) {
-                e.target.previousSibling.focus();
-                onSelectRow(
-                  e.target.previousSibling.getAttribute('data-row-key')
-                );
-              }
-
-              if (
-                e.key === 'ArrowDown' &&
-                index < topicsMap![currentTopic]?.messages?.length!
-              ) {
-                e.target.nextSibling.focus();
-                onSelectRow(e.target.nextSibling.getAttribute('data-row-key'));
-              }
-            } catch (err) {
-              // failure
+    <Table
+      virtual
+      loading={isLoading}
+      rowKey={'offset'}
+      components={components}
+      columns={columns as any}
+      onRow={(record: any, index) => ({
+        tabIndex: index,
+        onClick: () => {
+          onSelectRow(record['offset']);
+        },
+        onKeyDown: (e: any) => {
+          e.preventDefault();
+          try {
+            if (index == undefined) {
+              return;
             }
-          },
-        })}
-        rowClassName={() => 'selectedRow'}
-        pagination={false}
-        dataSource={
-          currentTopic
-            ? topicsMap![currentTopic]?.messages?.filter((v: any) => {
-                return JSON.stringify(v).includes(searchTerm);
-              }) || []
-            : []
-        }
-        scroll={{y: height}}
-        size='small'
-      />
+            if (e.key === 'ArrowUp' && index > 0) {
+              e.target.previousSibling.focus();
+              onSelectRow(
+                e.target.previousSibling.getAttribute('data-row-key')
+              );
+            }
 
+            if (
+              e.key === 'ArrowDown' &&
+              index < topicsMap![currentTopic]?.messages?.length!
+            ) {
+              e.target.nextSibling.focus();
+              onSelectRow(e.target.nextSibling.getAttribute('data-row-key'));
+            }
+          } catch (err) {
+            // failure
+          }
+        },
+      })}
+      rowClassName={() => 'selectedRow'}
+      pagination={false}
+      dataSource={
+        currentTopic
+          ? topicsMap![currentTopic]?.messages?.filter((v: any) => {
+              return JSON.stringify(v).includes(searchTerm);
+            }) || []
+          : []
+      }
+      scroll={{y: height}}
+      size='small'
+    />
   );
 };

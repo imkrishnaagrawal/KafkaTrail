@@ -16,4 +16,10 @@ export type OFFSET = 'earliest' | 'latest' | 'offset';
 
 export type DATA_FORMAT = 'JSON' | 'XML' | 'TEXT' | 'HEX';
 
-export type DATA_FIELD = 'key' | 'partition' | 'offset' | 'value' | 'timestamp' | 'headers';
+export type DATA_FIELD =
+  | 'key'
+  | 'partition'
+  | 'offset'
+  | 'value'
+  | 'timestamp'
+  | 'headers';

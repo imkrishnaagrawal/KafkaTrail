@@ -86,7 +86,6 @@ const TopicSideMenu: React.FC<Props> = () => {
             backgroundColor: 'rgb(46, 62, 101)',
             width: 31,
           }}
-
           icon={<CopyOutlined />}
           size={'middle'}
           onClick={async () => {

@@ -12,7 +12,7 @@ import {persistStore, persistReducer} from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
 import {thunk} from 'redux-thunk';
-import { LogInfo } from '@wails-runtime';
+import {LogInfo} from '@wails-runtime';
 
 const persistConfig = {
   key: 'debug-101',
@@ -21,7 +21,7 @@ const persistConfig = {
 };
 
 const customMiddleWare = (_store: any) => (next: any) => (action: any) => {
-  LogInfo(`redux action: ${JSON.stringify(action)}`)
+  LogInfo(`redux action: ${JSON.stringify(action)}`);
   next(action);
 };
 

@@ -19,7 +19,6 @@ export const TopicScreen: React.FC = () => {
     (state: RootState) => state.dataPanel
   );
 
-
   useLayoutEffect(() => {
     if (tableRef.current) setHeight(tableRef.current.offsetHeight - 50);
   }, [tableRef.current, fetchSettings.panelShow]);
@@ -46,7 +45,8 @@ export const TopicScreen: React.FC = () => {
             <Panel
               maxSize={85}
               onResize={(size) => {
-                if (tableRef.current) setHeight(tableRef.current.offsetHeight - 50);
+                if (tableRef.current)
+                  setHeight(tableRef.current.offsetHeight - 50);
               }}
               style={{
                 display: 'flex',

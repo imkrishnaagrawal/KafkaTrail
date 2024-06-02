@@ -1,10 +1,21 @@
-import {createAsyncThunk, createSlice, PayloadAction, Slice} from '@reduxjs/toolkit';
+import {
+  createAsyncThunk,
+  createSlice,
+  PayloadAction,
+  Slice,
+} from '@reduxjs/toolkit';
 import {DefaultKafkaConfig} from '@/store/authSlice';
 import {FetchSettings} from '@/store/configSlice';
 import {RootState} from '.';
-import { FetchMessages,FetchMeta, FetchTopics, GetTopicSettings, ProduceMessage} from '@wails/main/KafkaService';
+import {
+  FetchMessages,
+  FetchMeta,
+  FetchTopics,
+  GetTopicSettings,
+  ProduceMessage,
+} from '@wails/main/KafkaService';
 import {main} from '@wails/models';
-import { LogError } from '@wails-runtime';
+import {LogError} from '@wails-runtime';
 
 export interface KafkaMessage {
   topic: string;
@@ -15,13 +26,10 @@ export interface KafkaMessage {
   partition: number;
 }
 
-
-
-
 interface TopicData {
   message_count?: number;
   partition_count?: number;
-  partitions?: number[]
+  partitions?: number[];
   messages?: KafkaMessage[];
   config: any;
 }
@@ -57,10 +65,9 @@ export const getTopicConfig = createAsyncThunk(
       ...currentConnection,
     };
     try {
-
       const [_, response] = await Promise.all([
         new Promise((resolve) => setTimeout(resolve, 1000)),
-        GetTopicSettings(config, topic)
+        GetTopicSettings(config, topic),
       ]);
       return response;
     } catch (error: any) {
@@ -102,7 +109,6 @@ export const fetchTopics = createAsyncThunk(
         ...currentConfig,
       };
 
-
       const [_, topics] = await Promise.all([
         new Promise((resolve) => setTimeout(resolve, 1000)),
         FetchTopics(config),
@@ -123,13 +129,10 @@ export const fetchTopicMeta = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-
-
       let config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
       };
-
 
       const [_, response] = await Promise.all([
         await new Promise((resolve) => {
@@ -151,7 +154,6 @@ export const fetchTopicMeta = createAsyncThunk(
   }
 );
 
-
 export const fetchTopicData = createAsyncThunk(
   'app/fetchTopicData',
   async (
@@ -159,8 +161,6 @@ export const fetchTopicData = createAsyncThunk(
     thunkAPI
   ) => {
     try {
-
-
       let config = {
         ...DefaultKafkaConfig,
         ...currentConnection,
@@ -172,9 +172,13 @@ export const fetchTopicData = createAsyncThunk(
           setTimeout(resolve, 1000);
         }),
 
-
-
-        FetchMessages(config, currentTopic, fetchSettings.messageCount, fetchSettings.autoOffsetReset == 'latest', fetchSettings?.partition),
+        FetchMessages(
+          config,
+          currentTopic,
+          fetchSettings.messageCount,
+          fetchSettings.autoOffsetReset == 'latest',
+          fetchSettings?.partition
+        ),
       ]);
       let topicData = {
         message_count: response.metadata.message_count,
@@ -253,7 +257,7 @@ const dataSlice = createSlice({
           partition_count: meta.partition_count,
           messages: meta.messages,
           partitions: meta.partitions,
-          config: {}
+          config: {},
         };
         state.loading = false;
         state.error = null;
@@ -271,9 +275,9 @@ const dataSlice = createSlice({
         state.topicsMap[topic] = {
           message_count: meta.message_count,
           partition_count: meta.partition_count,
-          partitions  : meta.partitions,
+          partitions: meta.partitions,
           messages: state.topicsMap[topic]?.messages || [],
-          config: {}
+          config: {},
         };
         state.loading = false;
         state.error = null;

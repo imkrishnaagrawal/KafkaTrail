@@ -11,8 +11,6 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 
-
-
 const SideMenu: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

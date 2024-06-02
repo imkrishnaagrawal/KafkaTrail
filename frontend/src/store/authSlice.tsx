@@ -1,8 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {OFFSET, KAFKA_PROTOCOL, SASL_MECHANISM} from '@/types/types';
-import { ValidateConnection } from '@wails/main/KafkaService';
-import {main} from '@wails/models'
-
+import {ValidateConnection} from '@wails/main/KafkaService';
+import {main} from '@wails/models';
 
 export const DefaultKafkaConfig = {
   autoOffsetReset: 'latest',

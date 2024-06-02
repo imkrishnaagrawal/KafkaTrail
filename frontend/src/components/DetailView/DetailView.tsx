@@ -50,7 +50,12 @@ export const DetailView: React.FC<Props> = ({data}) => {
         >
           <Tag color='cyan'>
             {' '}
-            Size: {data && data!['size'] ? dataField == 'key' ? data!['key_size'] + ' B' : data!['size'] + ' B' : 'N/A'}
+            Size:{' '}
+            {data && data!['size']
+              ? dataField == 'key'
+                ? data!['key_size'] + ' B'
+                : data!['size'] + ' B'
+              : 'N/A'}
           </Tag>
         </span>
         <Radio.Group
@@ -105,12 +110,10 @@ export const DetailView: React.FC<Props> = ({data}) => {
       >
         {dataField == 'headers' && data?.headers?.length > 0 ? (
           <Table
-
             pagination={false}
             columns={columns}
             dataSource={data?.headers || []}
             size='small'
-
             style={{overflow: 'scroll', flex: 1, marginBottom: 20}}
           />
         ) : (
@@ -122,22 +125,23 @@ export const DetailView: React.FC<Props> = ({data}) => {
               padding: 10,
             }}
           >
-            {dataField == 'value' || dataField == 'key'
-              ? data && formatter.format(data![dataField], dataFormat)
-              : dataField == 'timestamp' ?
-             <>
-              <div>
-                Unix Timestamp: {data && data[dataField]}
-              </div>
-              <div>
-                UTC Date   : {data && new Date(data[dataField] * 1000).toUTCString()}
-              </div>
-              <div>
-                Local Date : {data && new Date(data[dataField] * 1000).toLocaleString()}
-              </div>
-
-             </>
-              : data && data[dataField]}
+            {dataField == 'value' || dataField == 'key' ? (
+              data && formatter.format(data![dataField], dataFormat)
+            ) : dataField == 'timestamp' ? (
+              <>
+                <div>Unix Timestamp: {data && data[dataField]}</div>
+                <div>
+                  UTC Date :{' '}
+                  {data && new Date(data[dataField] * 1000).toUTCString()}
+                </div>
+                <div>
+                  Local Date :{' '}
+                  {data && new Date(data[dataField] * 1000).toLocaleString()}
+                </div>
+              </>
+            ) : (
+              data && data[dataField]
+            )}
           </pre>
         )}
       </div>

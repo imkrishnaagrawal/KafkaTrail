@@ -13,8 +13,9 @@ interface ConnectionFormProps {
   connectionName?: string;
 }
 
-export const ConnectionForm: React.FC<ConnectionFormProps> = ({connectionName}) => {
-
+export const ConnectionForm: React.FC<ConnectionFormProps> = ({
+  connectionName,
+}) => {
   const [protocol, setProtocol] = useState<string>('PLAINTEXT');
   const dispatch = useDispatch<AppDispatch>();
   const [form] = Form.useForm();
@@ -28,7 +29,7 @@ export const ConnectionForm: React.FC<ConnectionFormProps> = ({connectionName}) 
 
   useEffect(() => {
     if (connectionName && connections) {
-      form.setFieldsValue({ ...connections[connectionName] });
+      form.setFieldsValue({...connections[connectionName]});
       setProtocol(connections[connectionName].protocol);
     } else {
       form.resetFields();
@@ -70,19 +71,16 @@ export const ConnectionForm: React.FC<ConnectionFormProps> = ({connectionName}) 
     <>
       {contextHolder}
       <Spin fullscreen={true} spinning={loading} />
-      <Form
-        name='kafka_auth'
-        onFinish={onFinish}
-        size={'large'}
-        form={form}
-
-      >
+      <Form name='kafka_auth' onFinish={onFinish} size={'large'} form={form}>
         <Form.Item
           name='connectionName'
-
           rules={[{required: true, message: 'Connection Name is required'}]}
         >
-          <Input disabled={connectionName != undefined } prefix={<UserOutlined />} placeholder='Connection Name' />
+          <Input
+            disabled={connectionName != undefined}
+            prefix={<UserOutlined />}
+            placeholder='Connection Name'
+          />
         </Form.Item>
         <Form.Item
           name='bootstrapServers'

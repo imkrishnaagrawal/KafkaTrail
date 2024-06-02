@@ -1,9 +1,7 @@
 // configSlice.ts
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {DATA_FIELD, DATA_FORMAT, OFFSET} from '@/types/types';
-import { main } from '@wails/models';
-
-
+import {main} from '@wails/models';
 
 export interface FetchSettings {
   autoOffsetReset: OFFSET;
@@ -13,14 +11,12 @@ export interface FetchSettings {
   panelShow: boolean;
   dataFormat: DATA_FORMAT;
   dataField: DATA_FIELD;
-
 }
 interface ConfigState {
   fetchSettings: FetchSettings;
   loading: boolean;
   error: string | null;
 }
-
 
 const initialState: ConfigState = {
   fetchSettings: {
@@ -34,7 +30,7 @@ const initialState: ConfigState = {
     messageCount: 50,
     panelShow: true,
     dataFormat: 'JSON',
-    dataField: 'value'
+    dataField: 'value',
   },
   loading: false,
   error: null,
@@ -58,7 +54,6 @@ const configSlice = createSlice({
     },
 
     setPartition(state, action: PayloadAction<any>) {
-
       state.fetchSettings.partition = {
         ...state.fetchSettings.partition,
         ...action.payload,

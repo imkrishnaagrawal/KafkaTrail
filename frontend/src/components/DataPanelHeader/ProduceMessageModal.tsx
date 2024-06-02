@@ -55,7 +55,7 @@ const ProduceMessageModal: React.FC<ProduceMessageModalProps> = ({
   return (
     <Modal
       getContainer={'#content-panel'}
-      title='Produer'
+      title='Producer'
       open={isModalOpen}
       maskClosable={!loading}
       confirmLoading={loading}

@@ -1,9 +1,4 @@
-import {
-  Navigate,
-  Route,
-  Routes,
-  useNavigate,
-} from 'react-router-dom';
+import {Navigate, Route, Routes, useNavigate} from 'react-router-dom';
 import {LoginScreen} from '@/screens/LoginScreen/LoginScreen';
 import {RootState, persistor, useAppSelector} from '@/store';
 import {Layout2} from '@/layouts/Layout/Layout';

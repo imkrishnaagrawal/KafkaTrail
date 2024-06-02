@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: [
-      {find: '@wails-runtime', replacement: path.resolve(__dirname, 'wailsjs/runtime')},
+      {
+        find: '@wails-runtime',
+        replacement: path.resolve(__dirname, 'wailsjs/runtime'),
+      },
       {find: '@wails', replacement: path.resolve(__dirname, 'wailsjs/go')},
       {find: '@', replacement: path.resolve(__dirname, 'src')},
     ],
