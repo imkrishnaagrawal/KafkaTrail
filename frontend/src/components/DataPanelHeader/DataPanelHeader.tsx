@@ -336,7 +336,9 @@ export function DataPanelHeader({ setSearchTerm }: DataPanelHeaderProps) {
           <ConfigModal
             isModalOpen={isConfigModalOpen}
             setIsModalOpen={setConfigModalOpen}
-            initialSettings={currentTopic ? topicsMap[currentTopic].config : {}}
+            initialSettings={
+              currentTopic && topicsMap ? topicsMap[currentTopic]?.config : {}
+            }
           />
         </Space>
       </Header>

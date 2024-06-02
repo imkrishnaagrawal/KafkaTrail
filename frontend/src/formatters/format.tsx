@@ -2,12 +2,11 @@
 /* eslint-disable max-classes-per-file */
 import vkbeautify from 'vkbeautify';
 import hljs from 'highlight.js';
-import { ReactNode } from 'react';
 import { DataFormat } from '@/types/types';
 import 'highlight.js/styles/default.css';
 
 interface Formatter {
-  format(data: string): string | ReactNode;
+  format(data: string): string | JSX.Element;
 }
 
 function highlight(data: string, format: string) {

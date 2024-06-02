@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Table } from 'antd';
 import type { TableColumnsType, TableProps } from 'antd';
 import './TopicTable.css';
@@ -84,13 +84,28 @@ export function TopicTable({
     initialColumns ?? []
   );
 
-  const onSelectRow = (offset: number) => {
+  const [messages, setMessages] = useState<KafkaMessage[]>([]);
+
+  useEffect(() => {
     if (!currentTopic || !(currentTopic in topicsMap)) {
       return;
     }
-    const record = topicsMap![currentTopic]?.messages?.filter(
-      (v) => v.offset === offset
-    )[0];
+    if (searchTerm) {
+      setMessages(
+        topicsMap[currentTopic].messages?.filter((v) => {
+          return JSON.stringify(v).includes(searchTerm);
+        }) ?? []
+      );
+    } else {
+      setMessages(topicsMap[currentTopic].messages ?? []);
+    }
+  }, [topicsMap, currentTopic, searchTerm]);
+
+  const onSelectRow = (offset: number) => {
+    if (!messages) {
+      return;
+    }
+    const record = messages?.filter((v) => v.offset === offset)[0];
 
     try {
       if (!record) {
@@ -163,7 +178,7 @@ export function TopicTable({
             if (
               e.key === 'ArrowDown' &&
               currentTopic &&
-              index < (topicsMap![currentTopic]?.messages?.length ?? 0)
+              index < (messages?.length ?? 0)
             ) {
               e.currentTarget.nextSibling.focus();
               onSelectRow(
@@ -180,13 +195,7 @@ export function TopicTable({
       })}
       rowClassName={() => 'selectedRow'}
       pagination={false}
-      dataSource={
-        currentTopic
-          ? topicsMap![currentTopic]?.messages?.filter((v) => {
-              return JSON.stringify(v).includes(searchTerm);
-            }) || []
-          : []
-      }
+      dataSource={messages}
       scroll={{ y: height }}
       size="small"
     />

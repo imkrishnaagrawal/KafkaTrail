@@ -1,7 +1,6 @@
 // store.ts
 import {
   Action,
-  Middleware,
   ThunkAction,
   combineReducers,
   configureStore,
@@ -10,7 +9,6 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { thunk } from 'redux-thunk';
-import { LogInfo } from '@wails-runtime';
 import dataPanelReducer from './dataSlice';
 import authReducer from './authSlice';
 import configReducer from './configSlice';

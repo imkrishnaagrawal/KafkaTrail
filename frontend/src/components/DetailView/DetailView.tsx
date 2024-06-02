@@ -28,28 +28,37 @@ const columns: TableProps<AnyObject>['columns'] = [
 interface DetailViewProps {
   data: KafkaMessage | undefined;
 }
+interface RenderMessageProps {
+  data: KafkaMessage;
+  dataField: DataField;
+  dataFormat: DataFormat;
+}
+function RenderMessage({
+  data,
+  dataField,
+  dataFormat,
+}: RenderMessageProps): JSX.Element {
+  if (!data)
+    return 'Row not selected to view details' as unknown as JSX.Element;
 
-function RenderMessage(
-  data: KafkaMessage,
-  dataField: DataField,
-  dataFormat: DataFormat
-) {
-  if (!data) return 'Row not selected to view details';
-  // eslint-disable-next-line react/destructuring-assignment
   const value = data[dataField].toString();
-  return dataField === 'value' || dataField === 'key' ? (
-    data && formatter.format(data![dataField], dataFormat)
-  ) : dataField === 'timestamp' ? (
-    <>
-      <div>Unix Timestamp: {value}</div>
-      <div>UTC Date : {new Date(parseInt(value, 10) * 1000).toUTCString()}</div>
-      <div>
-        Local Date : {new Date(parseInt(value, 10) * 1000).toLocaleString()}
-      </div>
-    </>
-  ) : (
-    data && value
-  );
+  if (dataField === 'value' || dataField === 'key') {
+    return formatter.format(data[dataField], dataFormat) as JSX.Element;
+  }
+  if (dataField === 'timestamp') {
+    return (
+      <>
+        <div>Unix Timestamp: {value}</div>
+        <div>
+          UTC Date : {new Date(parseInt(value, 10) * 1000).toUTCString()}
+        </div>
+        <div>
+          Local Date : {new Date(parseInt(value, 10) * 1000).toLocaleString()}
+        </div>
+      </>
+    );
+  }
+  return <span>{value}</span>;
 }
 
 export function DetailView({ data }: DetailViewProps) {
@@ -152,7 +161,11 @@ export function DetailView({ data }: DetailViewProps) {
               padding: 10,
             }}
           >
-            {RenderMessage(data!, dataField, dataFormat)}
+            <RenderMessage
+              data={data!}
+              dataField={dataField}
+              dataFormat={dataFormat}
+            />
           </pre>
         )}
       </div>
