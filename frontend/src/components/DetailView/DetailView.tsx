@@ -26,7 +26,7 @@ const columns: TableProps<AnyObject>['columns'] = [
 ];
 
 interface DetailViewProps {
-  data: KafkaMessage;
+  data: KafkaMessage | undefined;
 }
 
 function RenderMessage(
@@ -34,7 +34,7 @@ function RenderMessage(
   dataField: DataField,
   dataFormat: DataFormat
 ) {
-  if (!data) return 'No data';
+  if (!data) return 'Row not selected to view details';
   // eslint-disable-next-line react/destructuring-assignment
   const value = data[dataField].toString();
   return dataField === 'value' || dataField === 'key' ? (
@@ -135,7 +135,7 @@ export function DetailView({ data }: DetailViewProps) {
           flex: 1,
         }}
       >
-        {dataField === 'headers' && data?.headers?.length > 0 ? (
+        {dataField === 'headers' && data && data?.headers?.length > 0 ? (
           <Table
             pagination={false}
             columns={columns}
@@ -152,7 +152,7 @@ export function DetailView({ data }: DetailViewProps) {
               padding: 10,
             }}
           >
-            {RenderMessage(data, dataField, dataFormat)}
+            {RenderMessage(data!, dataField, dataFormat)}
           </pre>
         )}
       </div>

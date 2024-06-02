@@ -13,8 +13,10 @@ const initialColumns: TableProps<KafkaMessage>['columns'] = [
     dataIndex: 'timestamp',
     key: 'timestamp',
     sorter: (a, b) => a.timestamp - b.timestamp,
-    ellipsis: true,
-    width: 100,
+    ellipsis: {
+      showTitle: false,
+    },
+    width: 200,
     render: (text) => {
       const date = new Date(parseInt(text, 10) * 1000);
       return <span>{date.toLocaleString()}</span>;
@@ -24,7 +26,9 @@ const initialColumns: TableProps<KafkaMessage>['columns'] = [
     title: 'Key',
     dataIndex: 'key',
     key: 'key',
-    ellipsis: true,
+    ellipsis: {
+      showTitle: false,
+    },
     width: 100,
     // render: (text) => <a>{text}</a>,
   },
@@ -33,13 +37,17 @@ const initialColumns: TableProps<KafkaMessage>['columns'] = [
     dataIndex: 'partition',
     key: 'partition',
     width: 100,
-    ellipsis: true,
+    ellipsis: {
+      showTitle: false,
+    },
   },
   {
     title: 'Offset',
     dataIndex: 'offset',
     key: 'offset',
-    ellipsis: true,
+    ellipsis: {
+      showTitle: false,
+    },
     sorter: (a, b) => a.offset - b.offset,
     width: 100,
   },
@@ -48,7 +56,9 @@ const initialColumns: TableProps<KafkaMessage>['columns'] = [
     title: 'Value',
     dataIndex: 'value',
     key: 'value',
-    ellipsis: true,
+    ellipsis: {
+      showTitle: false,
+    },
     // width: 200,
   },
 ];

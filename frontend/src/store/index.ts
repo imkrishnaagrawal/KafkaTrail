@@ -21,10 +21,10 @@ const persistConfig = {
   whitelist: ['auth'],
 };
 
-const actionLogger: Middleware = () => (next) => (action) => {
-  LogInfo(`redux action: ${JSON.stringify(action)}`);
-  return next(action);
-};
+// const actionLogger: Middleware = () => (next) => (action) => {
+//   LogInfo(`redux action: ${JSON.stringify(action)}`);
+//   return next(action);
+// };
 
 const rootReducer = combineReducers({
   config: configReducer,
@@ -39,9 +39,7 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    })
-      .concat(thunk)
-      .concat(actionLogger),
+    }).concat(thunk),
   devTools: true,
 });
 

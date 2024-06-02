@@ -19,14 +19,18 @@ export function TopicScreen() {
   const ref = useRef<ImperativePanelHandle | null>(null);
   const [height, setHeight] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedRecord, setSelectedRecord] = useState<KafkaMessage | string>(
-    ''
-  );
+  const [selectedRecord, setSelectedRecord] = useState<
+    KafkaMessage | undefined
+  >();
   const [searchTerm, setSearchTerm] = useState('');
   const { fetchSettings } = useSelector((state: RootState) => state.config);
   const { currentTopic, topicsMap, loading } = useSelector(
     (state: RootState) => state.dataPanel
   );
+
+  useEffect(() => {
+    setSelectedRecord(undefined);
+  }, [currentTopic]);
 
   useLayoutEffect(() => {
     if (tableRef.current) setHeight(tableRef.current.offsetHeight - 50);
@@ -39,10 +43,6 @@ export function TopicScreen() {
       ref?.current?.collapse();
     }
   }, [fetchSettings.panelShow]);
-
-  useLayoutEffect(() => {
-    setSelectedRecord('No data is selected');
-  }, [currentTopic]);
 
   return (
     <Layout>
@@ -92,9 +92,7 @@ export function TopicScreen() {
                 flexDirection: 'column',
               }}
             >
-              {typeof selectedRecord !== 'string' && (
-                <DetailView data={selectedRecord} />
-              )}
+              <DetailView data={selectedRecord} />
             </Panel>
           </PanelGroup>
         </div>

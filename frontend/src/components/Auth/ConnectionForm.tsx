@@ -10,10 +10,13 @@ import { addConnection, login } from '@/store/authSlice';
 const { Option } = Select;
 
 interface ConnectionFormProps {
+  // eslint-disable-next-line react/require-default-props
   connectionName?: string;
 }
 
-export function ConnectionForm({ connectionName }: ConnectionFormProps) {
+export function ConnectionForm(
+  { connectionName }: ConnectionFormProps = { connectionName: undefined }
+) {
   const [protocol, setProtocol] = useState<string>('PLAINTEXT');
   const dispatch = useDispatch<AppDispatch>();
   const [form] = Form.useForm();
@@ -183,7 +186,3 @@ export function ConnectionForm({ connectionName }: ConnectionFormProps) {
     </>
   );
 }
-
-ConnectionForm.defaultProps = {
-  connectionName: undefined,
-};
